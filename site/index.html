@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-1B Sponsor Explorer</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c1017'/%3E%3Crect x='6' y='17' width='4' height='9' rx='1' fill='%2358a6ff'/%3E%3Crect x='12' y='12' width='4' height='14' rx='1' fill='%2339c5cf'/%3E%3Crect x='18' y='8' width='4' height='18' rx='1' fill='%2358a6ff'/%3E%3Crect x='24' y='14' width='4' height='12' rx='1' fill='%233fb950'/%3E%3C/svg%3E">
+<meta name="description" content="Explore 799,016 H-1B labor condition applications from the U.S. Department of Labor — search sponsors by role, wage, location and fiscal quarter.">
+<meta name="color-scheme" content="dark">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0c1017;--panel:#141a23;--panel2:#1b232e;--bd:#252e3b;--bd2:#334155;
+--tx:#e6edf3;--mu:#8b98a9;--mu2:#64748b;--acc:#58a6ff;--grn:#3fb950;--amb:#e3b341;
+--red:#f85149;--pur:#bc8cff;--cy:#39c5cf;--r:8px}
+html,body{height:100%}
+body{background:var(--bg);color:var(--tx);font:14px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh}
+button,input,select{font:inherit;color:inherit}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#2c3745;border-radius:5px}
+::-webkit-scrollbar-thumb:hover{background:#3c4a5c}
+#loader{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:999}
+#loader h1{font-size:20px;font-weight:600;letter-spacing:-.2px}
+#loader p{color:var(--mu);font-size:13px}
+.bar{width:260px;height:3px;background:var(--bd);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:30%;background:var(--acc);border-radius:2px;animation:sl 1.1s ease-in-out infinite}
+@keyframes sl{0%{transform:translateX(-110%)}100%{transform:translateX(400%)}}
+header{display:flex;align-items:center;gap:16px;padding:10px 18px;border-bottom:1px solid var(--bd);background:var(--panel);flex-shrink:0}
+.logo{font-weight:650;font-size:15px;letter-spacing:-.3px;white-space:nowrap}
+.logo span{color:var(--acc)}
+.src{font-size:11px;color:var(--mu2);border-left:1px solid var(--bd2);padding-left:16px;line-height:1.35}
+header .sp{flex:1}
+.gsearch{position:relative}
+.gsearch input{width:300px;background:var(--bg);border:1px solid var(--bd2);border-radius:var(--r);padding:7px 11px 7px 32px;outline:none;transition:border-color .15s}
+.gsearch input:focus{border-color:var(--acc)}
+.gsearch svg{position:absolute;left:10px;top:8px;width:14px;height:14px;fill:var(--mu2)}
+.btn{background:var(--panel2);border:1px solid var(--bd2);border-radius:var(--r);padding:7px 13px;cursor:pointer;transition:.15s;white-space:nowrap;font-size:13px}
+.btn:hover{background:#232d3a;border-color:#3f4d60}
+nav{display:flex;gap:2px;padding:0 18px;border-bottom:1px solid var(--bd);background:var(--panel);flex-shrink:0}
+nav button{background:none;border:none;border-bottom:2px solid transparent;padding:9px 15px;cursor:pointer;color:var(--mu);font-size:13px;font-weight:500;transition:.15s}
+nav button:hover{color:var(--tx)}
+nav button.on{color:var(--acc);border-bottom-color:var(--acc)}
+/* period bar */
+#pstrip{display:flex;align-items:center;gap:10px;padding:8px 18px;border-bottom:1px solid var(--bd);background:var(--panel);flex-shrink:0;overflow-x:auto}
+#pstrip .plab{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--mu2);font-weight:600;white-space:nowrap}
+#pers{display:flex;gap:4px}
+.per{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:78px;padding:4px 8px 5px;
+ border:1px solid var(--bd2);border-radius:6px;cursor:pointer;background:var(--bg);transition:.13s;user-select:none}
+.per:hover{border-color:#4a5a6f}
+.per.on{background:rgba(88,166,255,.14);border-color:var(--acc)}
+.per.warn{border-color:rgba(227,179,65,.5)}
+.per.warn.on{background:rgba(227,179,65,.14);border-color:var(--amb)}
+.per b em{font-style:normal;color:var(--amb)}
+.per b{font-size:11.5px;font-weight:600;color:var(--mu);white-space:nowrap}
+.per.on b{color:var(--tx)}
+.per u{text-decoration:none;font-size:10px;color:var(--mu2);font-variant-numeric:tabular-nums}
+.per.on u{color:var(--acc)}
+.per .pb{width:100%;height:3px;background:var(--bd);border-radius:2px;overflow:hidden}
+.per .pb i{display:block;height:100%;background:var(--acc);opacity:.55}
+.per.on .pb i{opacity:1}
+.pset{display:flex;gap:4px;margin-left:6px}
+.pset button{background:var(--bg);border:1px solid var(--bd2);border-radius:5px;padding:4px 9px;
+ font-size:11.5px;color:var(--mu);cursor:pointer;white-space:nowrap;transition:.13s}
+.pset button:hover{color:var(--tx);border-color:#4a5a6f}
+.pset button.on{background:rgba(88,166,255,.14);border-color:var(--acc);color:var(--tx)}
+main{flex:1;display:flex;min-height:0}
+#side{width:248px;flex-shrink:0;border-right:1px solid var(--bd);background:var(--panel);overflow-y:auto;padding:14px}
+#content{flex:1;overflow-y:auto;padding:16px 18px 40px}
+.fgrp{margin-bottom:16px}
+.fgrp label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--mu2);margin-bottom:5px;font-weight:600}
+.fgrp input[type=text],.fgrp select{width:100%;background:var(--bg);border:1px solid var(--bd2);border-radius:6px;padding:6px 9px;outline:none;font-size:13px}
+.fgrp input:focus,.fgrp select:focus{border-color:var(--acc)}
+.fgrp label.chk,.chk{display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;font-size:12.5px;color:var(--mu);text-transform:none;letter-spacing:0;font-weight:400;margin-bottom:0}
+.chk:hover{color:var(--tx)}
+.chk input{accent-color:var(--acc);width:14px;height:14px;cursor:pointer}
+#gchips{display:flex;flex-wrap:wrap;gap:4px}
+.gchip{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;background:var(--bg);border:1px solid var(--bd2);border-radius:6px;padding:4px 8px;font-size:11.5px;cursor:pointer;transition:.13s;color:var(--mu);user-select:none}
+.gchip:hover{border-color:#3f4d60;color:var(--tx)}
+.gchip.on{background:rgba(88,166,255,.13);border-color:var(--acc);color:var(--tx);font-weight:500}
+.gchip span{font-variant-numeric:tabular-nums;font-size:10.5px;color:var(--mu2)}
+.gchip.on span{color:var(--acc)}
+.gchip.zero{opacity:.4}
+.pill{display:inline-flex;align-items:center;gap:5px;background:var(--panel2);border:1px solid var(--bd2);border-radius:20px;padding:2px 6px 2px 9px;font-size:11.5px;margin:3px 3px 0 0}
+.pill i{cursor:pointer;font-style:normal;color:var(--mu2);padding:0 3px;border-radius:50%}
+.pill i:hover{color:var(--red)}
+.hint{font-size:11px;color:var(--mu2);margin-top:5px;line-height:1.45}
+.hint b{color:var(--mu)}
+#kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--bd);border-radius:var(--r);padding:11px 13px}
+.kpi .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--mu2);font-weight:600}
+.kpi .v{font-size:21px;font-weight:650;letter-spacing:-.6px;margin-top:3px;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:11px;color:var(--mu);margin-top:1px}
+.kpi .d{font-size:11px;margin-top:1px;font-weight:600}
+.up{color:var(--grn)}.dn{color:var(--red)}
+.grid{display:grid;gap:12px;margin-bottom:16px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1.4fr 1fr}
+@media(max-width:1150px){.g2,.g3{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.panel h3{font-size:12.5px;font-weight:600;padding:10px 13px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px}
+.panel h3 em{font-style:normal;color:var(--mu2);font-weight:400;font-size:11px}
+.panel .body{padding:13px}
+canvas{display:block;width:100%}
+.grow{display:grid;grid-template-columns:150px 1fr 62px 44px;align-items:center;gap:9px;padding:4px 5px;border-radius:5px;cursor:pointer;transition:.12s}
+.grow:hover{background:var(--panel2)}
+.grow.on{background:rgba(88,166,255,.12);box-shadow:inset 0 0 0 1px rgba(88,166,255,.35)}
+.gl{font-size:11.5px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grow.on .gl{color:var(--tx)}
+.gt{height:9px;background:var(--bd);border-radius:4px;overflow:hidden}
+.gt i{display:block;height:100%;background:linear-gradient(90deg,#1f6feb,#39c5cf);border-radius:4px}
+.gv{font-size:11.5px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.gp{font-size:10.5px;color:var(--mu2);text-align:right;font-variant-numeric:tabular-nums}
+#tiles{display:grid;grid-template-columns:repeat(11,1fr);gap:3px}
+.tile{aspect-ratio:1;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:9.5px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:.12s;color:#cfe4ff}
+.tile:hover{border-color:var(--tx);transform:scale(1.09)}
+.tile.sel{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.tile small{font-size:8px;opacity:.75;font-weight:400}
+.tbar{display:flex;align-items:center;gap:10px;margin-bottom:9px;flex-wrap:wrap}
+.tbar .cnt{font-size:12.5px;color:var(--mu)}
+.tbar .cnt b{color:var(--tx);font-variant-numeric:tabular-nums}
+#tblwrap{background:var(--panel);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.thead{display:flex;background:var(--panel2);border-bottom:1px solid var(--bd);font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--mu2);font-weight:600;position:sticky;top:0;z-index:2}
+.thead div{padding:8px 9px;cursor:pointer;user-select:none;display:flex;align-items:center;gap:3px;white-space:nowrap;overflow:hidden}
+.thead div:hover{color:var(--tx)}
+.thead div.act{color:var(--acc)}
+.arw{font-size:8px;opacity:.9}
+#vport{height:min(62vh,560px);overflow-y:auto;position:relative}
+#content.raw #vport{height:calc(100vh - 380px)}
+#spacer{position:relative}
+.tr{display:flex;position:absolute;left:0;right:0;border-bottom:1px solid #1c242f;align-items:center;cursor:pointer;transition:background .1s}
+.tr:hover{background:var(--panel2)}
+.tr>div{padding:0 9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.nm{font-weight:500}
+.sub{color:var(--mu2);font-size:11px}
+.tag{display:inline-block;padding:1px 5px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.2px}
+.t-g{background:rgba(63,185,80,.16);color:#56d364}
+.t-a{background:rgba(227,179,65,.16);color:var(--amb)}
+.t-r{background:rgba(248,81,73,.16);color:#ff7b72}
+.t-b{background:rgba(88,166,255,.16);color:var(--acc)}
+.t-p{background:rgba(188,140,255,.16);color:var(--pur)}
+.t-c{background:rgba(57,197,207,.16);color:var(--cy)}
+.t-y{background:rgba(219,109,40,.18);color:#f0883e}
+.t-n{background:rgba(139,152,169,.16);color:var(--mu)}
+.mini{display:inline-block;vertical-align:middle}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:680px;max-width:94vw;background:var(--panel);border-left:1px solid var(--bd2);transform:translateX(101%);transition:transform .22s cubic-bezier(.4,0,.2,1);z-index:100;display:flex;flex-direction:column;box-shadow:-18px 0 40px rgba(0,0,0,.45)}
+#drawer.open{transform:none}
+#dhead{padding:15px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:flex-start;gap:12px}
+#dhead h2{font-size:16.5px;font-weight:650;letter-spacing:-.3px;line-height:1.3}
+#dhead .meta{font-size:11.5px;color:var(--mu);margin-top:4px}
+#dbody{flex:1;overflow-y:auto;padding:15px 18px 40px}
+#dclose{background:none;border:none;font-size:20px;color:var(--mu);cursor:pointer;line-height:1;padding:2px 6px;border-radius:5px;margin-left:auto}
+#dclose:hover{background:var(--panel2);color:var(--tx)}
+.dsec{margin-bottom:20px}
+.dsec h4{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--mu2);font-weight:600;margin-bottom:8px}
+.dstat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dstat>div{background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:8px 10px}
+.dstat .k{font-size:10px;color:var(--mu2);text-transform:uppercase;letter-spacing:.4px}
+.dstat .v{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:2px}
+table.dt{width:100%;border-collapse:collapse;font-size:12.5px}
+table.dt th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--mu2);padding:5px 7px;border-bottom:1px solid var(--bd);font-weight:600}
+table.dt td{padding:5px 7px;border-bottom:1px solid #1a212b}
+table.dt tr:last-child td{border-bottom:none}
+table.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
+.wbar{height:6px;background:var(--bd);border-radius:3px;position:relative;overflow:hidden;min-width:60px}
+.wbar i{position:absolute;height:100%;background:linear-gradient(90deg,var(--acc),var(--cy));border-radius:3px}
+#scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .22s;z-index:99}
+#scrim.on{opacity:1;pointer-events:auto}
+#tip{position:fixed;background:#0a0e14;border:1px solid var(--bd2);border-radius:6px;padding:6px 9px;font-size:11.5px;pointer-events:none;opacity:0;transition:opacity .1s;z-index:200;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+#tip.on{opacity:1}
+.note{background:rgba(88,166,255,.07);border:1px solid rgba(88,166,255,.22);border-radius:var(--r);padding:10px 13px;font-size:12px;color:var(--mu);margin-bottom:14px;line-height:1.55}
+.note b{color:var(--tx);font-weight:600}
+.warn{background:rgba(227,179,65,.07);border-color:rgba(227,179,65,.25)}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;align-items:center;justify-content:center;z-index:300;padding:24px}
+#modal.on{display:flex}
+.mbox{background:var(--panel);border:1px solid var(--bd2);border-radius:12px;max-width:780px;width:100%;max-height:86vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.mbox h3{font-size:15px;font-weight:650;padding:15px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center}
+.mbox h3 button{margin-left:auto;background:none;border:none;color:var(--mu);font-size:21px;cursor:pointer;line-height:1;padding:0 5px;border-radius:5px}
+.mbox h3 button:hover{background:var(--panel2);color:var(--tx)}
+.mbody{overflow-y:auto;padding:16px 18px 22px}
+.mbody p{font-size:13px;color:var(--mu);line-height:1.62;margin-bottom:13px}
+.mbody b{color:var(--tx);font-weight:600}
+.mbody em{color:var(--mu);font-style:italic}
+
+/* ---------- narrow screens (desktop layout above 900px is untouched) ---------- */
+#sidetoggle{display:none;border:none;background:none;color:var(--mu);font-size:13px;
+ font-weight:500;padding:9px 12px;cursor:pointer;border-bottom:2px solid transparent}
+#sidetoggle:hover{color:var(--tx)}
+#sidescrim{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;
+ transition:opacity .22s;z-index:140}
+#sidescrim.on{opacity:1;pointer-events:auto}
+@media(max-width:900px){
+  #sidetoggle{display:block}
+  #side{position:fixed;left:0;top:0;bottom:0;width:284px;z-index:150;overflow-y:auto;
+   transform:translateX(-101%);transition:transform .22s cubic-bezier(.4,0,.2,1);
+   box-shadow:14px 0 34px rgba(0,0,0,.5)}
+  #side.open{transform:none}
+  header{flex-wrap:wrap;gap:8px 12px;padding:9px 12px}
+  .src{display:none}
+  header .sp{display:none}
+  .gsearch{flex:1;min-width:190px}
+  .gsearch input{width:100%}
+  .logo{font-size:14px}
+  nav{overflow-x:auto}
+  nav button{padding:9px 12px;white-space:nowrap}
+  #pstrip{padding:8px 12px}
+  #pstrip .plab:first-child{display:none}
+  #phint{display:none}
+  #content{padding:12px 12px 34px}
+  #kpis{grid-template-columns:repeat(2,1fr);gap:8px}
+  .kpi .v{font-size:18px}
+  .g2,.g3{grid-template-columns:1fr}
+  /* keep every column: scroll the table sideways rather than hiding data */
+  #tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .thead,#vport,#spacer{min-width:880px}
+  #vport{height:58vh}
+  #content.raw #vport{height:58vh}
+  #content.raw .thead,#content.raw #vport,#content.raw #spacer{min-width:1180px}
+  .grow{grid-template-columns:112px 1fr 54px 40px;gap:7px}
+  #drawer{width:100%;max-width:100%}
+  .dstat{grid-template-columns:repeat(2,1fr)}
+  .mbox{max-height:92vh}
+  .tbar .cnt:nth-child(2){display:none}
+}
+@media(max-width:560px){
+  #kpis{grid-template-columns:1fr 1fr}
+  .kpi{padding:9px 10px}
+  .kpi .v{font-size:17px}
+  #tiles{gap:2px}
+  .tile{font-size:8px}
+  .tile small{display:none}
+}
+</style>
+</head>
+<body>
+<div id="loader">
+  <h1>H-1B Sponsor Explorer</h1>
+  <div class="bar"><i></i></div>
+  <p id="lmsg">Decompressing dataset…</p>
+</div>
+
+<div id="app" style="display:none">
+<header>
+  <div class="logo">H-1B <span>Sponsor Explorer</span></div>
+  <div class="src" id="srcline"></div>
+  <div class="sp"></div>
+  <div class="gsearch">
+    <svg viewBox="0 0 16 16"><path d="M11.7 10.3a6 6 0 1 0-1.4 1.4l3.3 3.3 1.4-1.4-3.3-3.3ZM7 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z"/></svg>
+    <input id="q" type="text" placeholder="Search employer, role, or city…" autocomplete="off">
+  </div>
+  <button class="btn" id="about">Methodology</button>
+  <button class="btn" id="csv">Export CSV</button>
+  <button class="btn" id="reset">Reset</button>
+</header>
+
+<div id="pstrip">
+  <div class="plab">Period</div>
+  <div id="pers"></div>
+  <div class="pset" id="psets"></div>
+  <div class="plab" id="phint" style="margin-left:auto"></div>
+</div>
+
+<nav>
+  <button id="sidetoggle" title="Filters">☰ Filters</button>
+  <button data-v="emp" class="on">Employers</button>
+  <button data-v="role">Roles</button>
+  <button data-v="loc">Locations</button>
+  <button data-v="raw">Explorer</button>
+  <button data-v="trend">Trends</button>
+  <button data-v="ins">Insights</button>
+</nav>
+
+<main>
+  <div id="side">
+    <div class="fgrp">
+      <label>Occupation group</label>
+      <div id="gchips"></div>
+      <div class="hint" id="ghint">All groups included</div>
+    </div>
+    <div class="fgrp">
+      <label>Role / occupation</label>
+      <input id="fsoc" type="text" list="socl" placeholder="e.g. Software Developers">
+      <datalist id="socl"></datalist>
+      <div id="socpills"></div>
+    </div>
+    <div class="fgrp">
+      <label>State</label>
+      <select id="fst"><option value="">All states</option></select>
+    </div>
+    <div class="fgrp">
+      <label>City</label>
+      <input id="fcity" type="text" list="cityl" placeholder="All cities">
+      <datalist id="cityl"></datalist>
+    </div>
+    <div class="fgrp">
+      <label>Minimum median wage</label>
+      <input id="fwage" type="text" placeholder="e.g. 120000" inputmode="numeric">
+      <div class="hint" id="whint">No wage floor applied</div>
+    </div>
+    <div class="fgrp">
+      <label>Seniority (prevailing wage level)</label>
+      <select id="flvl">
+        <option value="">Any level</option>
+        <option value="1">Level I — entry</option>
+        <option value="2">Level II — qualified</option>
+        <option value="3">Level III — experienced</option>
+        <option value="4">Level IV — expert</option>
+      </select>
+    </div>
+    <div class="fgrp">
+      <label>Filters</label>
+      <label class="chk"><input type="checkbox" id="fnew"> Only net-new positions</label>
+      <label class="chk"><input type="checkbox" id="fdep"> Exclude H-1B dependent</label>
+      <label class="chk"><input type="checkbox" id="fabove"> Pays above prevailing wage</label>
+      <label class="chk"><input type="checkbox" id="fmin3"> 3+ petitions only</label>
+      <div class="hint"><b>Net-new</b> = positions flagged NEW_EMPLOYMENT, i.e. genuinely new hires
+        rather than renewals of people already on staff.</div>
+    </div>
+  </div>
+  <div id="content">
+    <div id="pwarn" class="note warn" style="display:none"></div>
+    <div id="kpis"></div>
+    <div id="views"></div>
+  </div>
+</main>
+</div>
+
+<div id="scrim"></div>
+<div id="sidescrim"></div>
+<aside id="drawer">
+  <div id="dhead">
+    <div style="flex:1"><h2 id="dname"></h2><div class="meta" id="dmeta"></div></div>
+    <button id="dclose">&times;</button>
+  </div>
+  <div id="dbody"></div>
+</aside>
+<div id="tip"></div>
+<div id="modal"><div class="mbox">
+  <h3>How these numbers are built <button id="mclose">&times;</button></h3>
+  <div class="mbody">
+    <p><b>Source.</b> U.S. Department of Labor, Office of Foreign Labor Certification — LCA Disclosure
+      Data. This is the public federal dataset that commercial H-1B sites repackage; nothing here is
+      scraped or licensed.</p>
+    <p><b>Period coverage is not continuous.</b> OFLC publishes a cumulative file through Q3 of the
+      current fiscal year, and separate Q4 files for closed years. This build therefore holds three
+      isolated Jul–Sep quarters (FY2023 Q4, FY2024 Q4, FY2025 Q4) plus a continuous FY2026 Q1–Q3
+      (Oct 2025 – Jun 2026). Those combine into a continuous twelve months from Jul 2025 to Jun 2026,
+      and give clean like-for-like Jul–Sep comparisons across 2023, 2024 and 2025. The FY2026 Q3 file
+      is cumulative — it contains every case decided from 1 October 2025 onward, which is where the
+      FY2026 Q1 and Q2 figures come from. Periods are chips
+      rather than a slider precisely because the gaps are real — do not read two adjacent chips as
+      consecutive time unless their labels say so.</p>
+    <p><b>The October 2025 federal shutdown distorts FY2026 Q1.</b> DOL's FLAG system went offline
+      when the shutdown began on 1 October 2025 and OFLC stopped issuing decisions. The data shows it
+      plainly: 1,388 decisions on 1 October, then between one and four per day for the rest of the
+      month, resuming on 3 November with visible catch-up spikes on 7 and 14 November. FY2026 Q1
+      therefore holds roughly two months of decisions rather than three, and November and December
+      are inflated by backlog. The quarter is flagged with ⚠ in the period strip. Nothing is missing
+      from the file — the gap is real-world, not a data defect — but do not read FY2026 Q1 as a normal
+      quarter or compare it against another Q1 at face value.</p>
+    <p><b>What an LCA is — and isn't.</b> An LCA is the wage-and-worksite filing an employer makes
+      <em>before</em> petitioning USCIS. It proves intent to sponsor, not an approved visa or a filled
+      job. Employers routinely file more LCAs than they use, so treat counts as sponsorship appetite
+      rather than headcount.</p>
+    <p><b>No petition is counted twice.</b> The cumulative Q3 file overlaps the Q4 files: 5,896 cases
+      appear in two source files, in every instance because the LCA was certified once and then
+      withdrawn later (a median of 409 days later). Each case is kept exactly once, at its
+      <em>earliest</em> decision, so a petition certified in July 2023 and withdrawn in May 2026 counts
+      in FY2023 Q4 where the sponsorship actually happened, rather than being carried forward into
+      FY2026. Selecting several quarters therefore adds them cleanly — FY2026 Q1 + Q2 + Q3 sums to the
+      FY2026 total with nothing repeated, and the six quarters partition all 799,016 petitions.</p>
+    <p><b>Petitions vs. worker positions.</b> One LCA can cover many positions. Across the file the
+      median is 1 position per filing, but a few employers file blanket LCAs covering dozens at once.
+      Rankings sort by petitions by default, and any employer averaging 10+ positions per filing is
+      marked with a ×N badge in the Workers column. Read those as sponsorship capacity, not hires.</p>
+    <p><b>Wages</b> are annualized (hourly × 2080, monthly × 12, weekly × 52, bi-weekly × 26). Where a
+      pay range is filed the midpoint is used. Values below $15k or above $2M are dropped as data-entry
+      errors. Percentiles are rounded to $500. A median shown without a marker is exact; one marked
+      <b>≈</b> is estimated from the filtered subset by interpolating the weighted distribution of
+      group medians. Selecting a period counts as filtering.</p>
+    <p><b>Employer names are canonicalized.</b> The raw files spell the same company many ways. Case,
+      punctuation and legal suffixes are normalized so one company isn't split across several rows, and
+      the most frequent original spelling is shown. This is deliberately conservative — genuinely
+      distinct subsidiaries stay separate.</p>
+    <p><b>Net-new</b> counts positions flagged NEW_EMPLOYMENT rather than CONTINUED_EMPLOYMENT
+      (renewing someone already on staff). This is the most useful column for a job search: a firm
+      filing thousands of petitions that are almost all renewals isn't hiring, it's maintaining.</p>
+    <p><b>vs prevailing</b> is offered wage ÷ the DOL-determined prevailing wage for that role and area.
+      100% means paying exactly the legal floor. Very high values usually mean the occupation's
+      prevailing wage comes from a low survey baseline — common in medicine and academia — not that the
+      job pays several times market. <b>Level</b> is the DOL prevailing-wage skill level, I (entry)
+      through IV (expert), averaged and weighted by petitions.</p>
+    <p><b>Occupation groups</b> roll the SOC occupations into 11 categories using the official SOC major
+      group (first two digits of the code). Technology &amp; Software is major group 15, Healthcare &amp;
+      Medicine is 29 and 31, Education &amp; Academia is 25, and so on; low-volume groups collect into
+      Other &amp; Support. A few titles are filed under two major groups in the source; each is assigned
+      the group it appears under most often. Group counts reconcile exactly to the dataset total, and the
+      count on each chip reflects every other active filter but not the group selection itself.</p>
+    <p><b>Grain.</b> Two tables: one row per employer × occupation × worksite state carrying
+      period-independent attributes, and one row per that key × fiscal quarter carrying everything that
+      varies over time. Individual case numbers are not included, which is what lets the whole dataset
+      live in a single offline file.</p>
+  </div>
+</div></div>
+<script id="payload" type="application/octet-stream"></script>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+let D=null, K=null, P=null, EOFF=null;
+
+/* ---------------- load ---------------- */
+function b64bytes(b64){const b=atob(b64),n=b.length,a=new Uint8Array(n);
+  for(let i=0;i<n;i++)a[i]=b.charCodeAt(i);return a;}
+async function boot(){
+  const inline=($('#payload')?.textContent||'').trim();
+  let bytes;
+  if(inline){ bytes=b64bytes(inline); }
+  else {
+    $('#lmsg').textContent='Downloading dataset…';
+    const r=await fetch('payload.bin.gz');
+    if(!r.ok) throw new Error(`Could not fetch payload.bin.gz (HTTP ${r.status}). This build has to be
+      served over http:// — opening the file directly from disk will not work. Use the single-file
+      H1B_Sponsor_Explorer.html for local use.`);
+    bytes=new Uint8Array(await r.arrayBuffer());
+  }
+  $('#lmsg').textContent='Parsing dataset…';
+  D = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).json();
+  prepare();
+  $('#loader').style.display='none'; $('#app').style.display='flex';
+  init();
+}
+function prepare(){
+  const I=a=>Int32Array.from(a);
+  K={ e:I(D.K.e), s:I(D.K.s), t:Int16Array.from(D.K.t), c:I(D.K.c), j:I(D.K.j),
+      p25:I(D.K.p25.map(v=>v*500)), p75:I(D.K.p75.map(v=>v*500)),
+      pwr:I(D.K.pwr), ft:I(D.K.ft), N:D.K.e.length };
+  const kd=D.P.kd, N=kd.length, k=new Int32Array(N);
+  let acc=0; for(let i=0;i<N;i++){ acc = i===0 ? kd[0] : acc+kd[i]; k[i]=acc; }
+  P={ N, k, q:Int8Array.from(D.P.q), n:I(D.P.n), w:I(D.P.w), nw:I(D.P.new), ct:I(D.P.cont),
+      cert:I(D.P.cert), den:I(D.P.den), p50:I(D.P.p50.map(v=>v*500)), lvl:I(D.P.lvl) };
+  // employer id per P row (hot path: avoids a double indirection in every loop)
+  P.e=new Int32Array(N); P.s=new Int32Array(N); P.t=new Int16Array(N);
+  for(let i=0;i<N;i++){const kk=k[i]; P.e[i]=K.e[kk]; P.s[i]=K.s[kk]; P.t[i]=K.t[kk];}
+  // employer -> contiguous [start,end) range in P (K is sorted by e,s,t; P by k)
+  const NE=D.emp.length;
+  EOFF=new Int32Array(NE+1).fill(-1);
+  for(let i=0;i<N;i++) if(EOFF[P.e[i]]===-1) EOFF[P.e[i]]=i;
+  let last=N; for(let x=NE;x>=0;x--){ if(EOFF[x]===-1) EOFF[x]=last; else last=EOFF[x]; }
+  EOFF[NE]=N;
+  D.lawmap=new Map(); D.empmeta.lawix.forEach((ix,i)=>D.lawmap.set(ix,D.lawdict[D.empmeta.lawval[i]]));
+  D.empLower=D.emp.map(x=>x.toLowerCase());
+  D.socLower=D.soc.map(x=>x.toLowerCase());
+  D.cityLower=D.city.map(x=>x.toLowerCase());
+}
+
+/* ---------------- helpers ---------------- */
+const fmt=n=>n==null||!isFinite(n)?'—':Math.round(n).toLocaleString('en-US');
+const money=n=>!n||!isFinite(n)?'—':'$'+Math.round(n).toLocaleString('en-US');
+const moneyK=n=>!n||!isFinite(n)?'—':'$'+Math.round(n/1000)+'k';
+const pct=n=>!isFinite(n)?'—':(n*100).toFixed(n*100<10?1:0)+'%';
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const signed=n=>(n>=0?'+':'')+(n*100).toFixed(0)+'%';
+function weightedMedian(vals,wts){
+  const p=[]; for(let i=0;i<vals.length;i++) if(vals[i]>0) p.push([vals[i],wts[i]]);
+  if(!p.length) return 0; if(p.length===1) return p[0][0];
+  p.sort((a,b)=>a[0]-b[0]);
+  const tot=p.reduce((s,x)=>s+x[1],0), half=tot/2; let run=0;
+  for(let i=0;i<p.length;i++){
+    const [v,w]=p[i], next=run+w;
+    if(next>=half){
+      if(i===p.length-1||next>half){
+        const pv=i?p[i-1][0]:v, f=w?Math.min(1,Math.max(0,(half-run)/w)):0;
+        return Math.round((pv+(v-pv)*Math.min(1,f+0.5))/500)*500;
+      }
+      return Math.round((v+p[i+1][0])/2/500)*500;
+    }
+    run=next;
+  }
+  return p[p.length-1][0];
+}
+
+/* ---------------- filter state ---------------- */
+const F={q:'',pers:new Set(),grps:new Set(),socs:new Set(),st:'',city:'',wage:0,lvl:0,
+         onlyNew:false,noDep:false,above:false,min3:false};
+let VIEW='emp', MASK=null;
+let SORT={emp:{k:'n',d:-1},role:{k:'n',d:-1},loc:{k:'n',d:-1},raw:{k:'n',d:-1},trend:{k:'b',d:-1}};
+const allPeriods=()=>F.pers.size===0||F.pers.size===D.periods.length;
+function narrowed(){ return !!(F.grps.size||F.socs.size||F.st||F.city||F.wage||F.lvl||
+  F.onlyNew||F.above||F.min3||F.q||!allPeriods()); }
+
+let MCACHE={};
+const clearMaskCache=()=>{MCACHE={};};
+function computeMask(opt={}){
+  // when the corresponding filter is inactive, the "skip" variant IS the full mask
+  const sg=opt.skipGroups&&F.grps.size, sp=opt.skipPeriods&&!allPeriods();
+  const key=(sg?'G':'')+(sp?'P':'');
+  if(MCACHE[key]) return MCACHE[key];
+  const m=new Uint8Array(P.N);
+  const stIx=F.st?D.st.indexOf(F.st):-1;
+  const cityIx=F.city?D.city.indexOf(F.city):-1;
+  const socIx=new Set([...F.socs].map(s=>D.soc.indexOf(s)).filter(i=>i>=0));
+  const qq=F.q.trim().toLowerCase();
+  const dep=D.empmeta.dep;
+  let grpOk=null;
+  if(!sg&&F.grps.size){ grpOk=new Uint8Array(D.soc.length);
+    for(let i=0;i<D.soc.length;i++) grpOk[i]=F.grps.has(D.socgrp[i])?1:0; }
+  let perOk=null;
+  if(!sp&&!allPeriods()){ perOk=new Uint8Array(D.periods.length);
+    F.pers.forEach(p=>perOk[p]=1); }
+  for(let i=0;i<P.N;i++){
+    if(perOk&&!perOk[P.q[i]]) continue;
+    if(grpOk&&!grpOk[P.s[i]]) continue;
+    if(stIx>=0&&P.t[i]!==stIx) continue;
+    if(socIx.size&&!socIx.has(P.s[i])) continue;
+    const kk=P.k[i];
+    if(cityIx>=0&&K.c[kk]!==cityIx) continue;
+    if(F.wage&&P.p50[i]<F.wage) continue;
+    if(F.lvl){const L=P.lvl[i]/10; if(L<F.lvl-0.5||L>=F.lvl+0.5) continue;}
+    if(F.onlyNew&&P.nw[i]<=0) continue;
+    if(F.above&&K.pwr[kk]<=100) continue;
+    if(F.min3&&P.n[i]<3) continue;
+    if(F.noDep&&dep[P.e[i]]>=50) continue;
+    if(qq){const e=P.e[i];
+      if(!(D.empLower[e].includes(qq)||D.socLower[P.s[i]].includes(qq)||
+           D.cityLower[K.c[kk]].includes(qq))) continue;}
+    m[i]=1;
+  }
+  return MCACHE[key]=m;
+}
+const buildMask=()=>{MASK=computeMask();};
+function facet(keyFn,len,opt){
+  const fm=computeMask(opt), c=new Float64Array(len);
+  for(let i=0;i<P.N;i++) if(fm[i]) c[keyFn(i)]+=P.n[i];
+  return c;
+}
+
+/* ---------------- rollups ---------------- */
+function rollup(keyFn,nKeys,mask){
+  const M=mask||MASK;
+  const n=new Float64Array(nKeys),w=new Float64Array(nKeys),nw=new Float64Array(nKeys),
+        ct=new Float64Array(nKeys),den=new Float64Array(nKeys),cert=new Float64Array(nKeys),
+        lv=new Float64Array(nKeys),lw=new Float64Array(nKeys),
+        pw=new Float64Array(nKeys),pww=new Float64Array(nKeys);
+  const wv=new Array(nKeys).fill(null), ww=new Array(nKeys).fill(null);
+  const seen=new Uint8Array(nKeys);
+  for(let i=0;i<P.N;i++){
+    if(!M[i]) continue;
+    const k=keyFn(i); if(k<0) continue;
+    seen[k]=1; n[k]+=P.n[i]; w[k]+=P.w[i]; nw[k]+=P.nw[i]; ct[k]+=P.ct[i];
+    den[k]+=P.den[i]; cert[k]+=P.cert[i];
+    if(P.p50[i]>0){ (wv[k]||(wv[k]=[])).push(P.p50[i]); (ww[k]||(ww[k]=[])).push(P.n[i]); }
+    if(P.lvl[i]>0){ lv[k]+=P.lvl[i]*P.n[i]; lw[k]+=P.n[i]; }
+    const pr=K.pwr[P.k[i]];
+    if(pr>0){ pw[k]+=pr*P.n[i]; pww[k]+=P.n[i]; }
+  }
+  const out=[];
+  for(let k=0;k<nKeys;k++) if(seen[k]) out.push({k,n:n[k],w:w[k],nw:nw[k],ct:ct[k],den:den[k],cert:cert[k],
+    med:wv[k]?weightedMedian(wv[k],ww[k]):0,
+    lvl:lw[k]?lv[k]/lw[k]/10:0, pwr:pww[k]?pw[k]/pww[k]/100:0,
+    newr:(nw[k]+ct[k])>0?nw[k]/(nw[k]+ct[k]):0,
+    denr:(den[k]+cert[k])>0?den[k]/(den[k]+cert[k]):0});
+  return out;
+}
+const rollEmp=()=>{const r=rollup(i=>P.e[i],D.emp.length);
+  if(!narrowed()) r.forEach(x=>{const v=D.empwage.p50[x.k]*500; if(v){x.med=v;x.exact=1;}}); return r;};
+const rollSoc=()=>{const r=rollup(i=>P.s[i],D.soc.length);
+  if(!narrowed()) r.forEach(x=>{const v=D.socbench.p50[x.k]*500; if(v){x.med=v;x.exact=1;}}); return r;};
+const rollSt=()=>rollup(i=>P.t[i],D.st.length);
+const rollCity=()=>rollup(i=>K.c[P.k[i]],D.city.length);
+function distinct(keyFn){
+  const s=new Map();
+  for(let i=0;i<P.N;i++){ if(!MASK[i])continue; const k=keyFn(i);
+    if(!s.has(k)) s.set(k,new Set()); s.get(k).add(P.e[i]); }
+  return s;
+}
+// petitions per period for the current filters (period filter itself ignored)
+function periodSeries(mask){
+  const M=mask||computeMask({skipPeriods:true}), c=new Float64Array(D.periods.length);
+  for(let i=0;i<P.N;i++) if(M[i]) c[P.q[i]]+=P.n[i];
+  return c;
+}
+
+/* ---------------- charts ---------------- */
+function hidpi(cv,h){const dpr=devicePixelRatio||1,w=cv.parentElement.clientWidth-26;
+  cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';
+  const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);return{x,w,h};}
+function hbar(cv,items,opt={}){
+  if(!items.length){cv.style.height='0';return;}
+  const {x,w}=hidpi(cv,opt.height||(items.length*22+8));
+  const max=Math.max(...items.map(d=>d.v),1), lw=opt.labelW||168;
+  x.font='600 11.5px ui-sans-serif,system-ui';
+  const vw=Math.ceil(Math.max(...items.map(d=>x.measureText(opt.f?opt.f(d.v):fmt(d.v)).width),10))+12;
+  items.forEach((d,i)=>{
+    const y=i*22+4, bw=Math.max(2,(w-lw-vw)*(d.v/max));
+    x.fillStyle='#8b98a9';x.font='11.5px ui-sans-serif,system-ui';x.textAlign='right';
+    let lab=d.l;
+    if(x.measureText(lab).width>lw-8){
+      while(lab.length>3&&x.measureText(lab+'…').width>lw-8) lab=lab.slice(0,-1); lab+='…';}
+    x.fillText(lab,lw-6,y+12);
+    const g=x.createLinearGradient(lw,0,lw+bw,0);
+    g.addColorStop(0,opt.c1||'#1f6feb');g.addColorStop(1,opt.c2||'#39c5cf');
+    x.fillStyle=g;x.beginPath();x.roundRect(lw,y+2,bw,14,3);x.fill();
+    x.fillStyle='#e6edf3';x.textAlign='left';x.font='600 11.5px ui-sans-serif,system-ui';
+    x.fillText(opt.f?opt.f(d.v):fmt(d.v),lw+bw+7,y+12);
+  });
+}
+function histogram(cv,vals,wts){
+  const {x,w,h}=hidpi(cv,150);
+  const BIN=20000,MAXW=320000,nb=MAXW/BIN,bins=new Float64Array(nb+1);
+  for(let i=0;i<vals.length;i++){if(vals[i]<=0)continue;bins[Math.min(nb,Math.floor(vals[i]/BIN))]+=wts[i];}
+  const max=Math.max(...bins,1),bw=w/(nb+1);
+  for(let i=0;i<=nb;i++){const bh=(h-24)*(bins[i]/max);
+    const g=x.createLinearGradient(0,h-24-bh,0,h-24);
+    g.addColorStop(0,'#58a6ff');g.addColorStop(1,'rgba(88,166,255,.25)');
+    x.fillStyle=g;x.beginPath();x.roundRect(i*bw+1,h-24-bh,bw-2,bh,[2,2,0,0]);x.fill();}
+  x.fillStyle='#64748b';x.font='10px ui-sans-serif,system-ui';x.textAlign='center';
+  for(let i=0;i<nb-1;i+=3)x.fillText('$'+(i*BIN/1000)+'k',i*bw+bw/2,h-8);
+  x.textAlign='right';x.fillText('$'+(MAXW/1000)+'k+',w-2,h-8);
+}
+function barSeries(cv,vals,labels,opt={}){
+  const {x,w,h}=hidpi(cv,opt.height||160);
+  const pad={l:46,r:8,t:10,b:24}, max=Math.max(...vals,1);
+  const iw=(w-pad.l-pad.r)/vals.length;
+  x.strokeStyle='#252e3b';x.lineWidth=1;
+  for(let k=0;k<=3;k++){const y=pad.t+(h-pad.t-pad.b)*k/3;
+    x.beginPath();x.moveTo(pad.l,y);x.lineTo(w-pad.r,y);x.stroke();
+    x.fillStyle='#64748b';x.font='10px ui-sans-serif,system-ui';x.textAlign='right';
+    x.fillText(fmt(max*(1-k/3)),pad.l-6,y+3);}
+  vals.forEach((v,i)=>{
+    const bh=(h-pad.t-pad.b)*(v/max), bx=pad.l+i*iw+iw*0.16, bw=iw*0.68;
+    const g=x.createLinearGradient(0,h-pad.b-bh,0,h-pad.b);
+    const on=opt.sel?opt.sel(i):true;
+    g.addColorStop(0,on?'#58a6ff':'#334054');g.addColorStop(1,on?'rgba(88,166,255,.3)':'rgba(51,64,84,.3)');
+    x.fillStyle=g;x.beginPath();x.roundRect(bx,h-pad.b-bh,bw,bh,[3,3,0,0]);x.fill();
+    x.fillStyle=on?'#e6edf3':'#64748b';x.font='600 10px ui-sans-serif,system-ui';x.textAlign='center';
+    if(bh>16) x.fillText(v>=1000?(v/1000).toFixed(0)+'k':fmt(v),bx+bw/2,h-pad.b-bh+12);
+    x.fillStyle='#64748b';x.font='10px ui-sans-serif,system-ui';
+    x.fillText(labels[i],bx+bw/2,h-8);
+  });
+}
+function sparkline(vals,w=70,h=17){
+  const max=Math.max(...vals,1);
+  const pts=vals.map((v,i)=>`${(i/(Math.max(1,vals.length-1)))*w},${h-(v/max)*(h-2)-1}`).join(' ');
+  return `<svg class="mini" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline points="${pts}"
+    fill="none" stroke="#58a6ff" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+const TILE={AK:[1,1],ME:[1,11],VT:[2,10],NH:[2,11],
+ WA:[3,1],ID:[3,2],MT:[3,3],ND:[3,4],MN:[3,5],IL:[3,6],WI:[3,7],MI:[3,8],NY:[3,9],RI:[3,10],MA:[3,11],
+ OR:[4,1],NV:[4,2],WY:[4,3],SD:[4,4],IA:[4,5],IN:[4,6],OH:[4,7],PA:[4,8],NJ:[4,9],CT:[4,10],
+ CA:[5,1],UT:[5,2],CO:[5,3],NE:[5,4],MO:[5,5],KY:[5,6],WV:[5,7],VA:[5,8],MD:[5,9],DE:[5,10],
+ AZ:[6,2],NM:[6,3],KS:[6,4],AR:[6,5],TN:[6,6],NC:[6,7],SC:[6,8],DC:[6,9],
+ OK:[7,3],LA:[7,4],MS:[7,5],AL:[7,6],GA:[7,7],
+ HI:[8,1],TX:[8,3],FL:[8,8],PR:[8,10],VI:[8,11],GU:[1,2],MP:[2,2]};
+function tilemap(el,rows){
+  const by=new Map(rows.map(r=>[D.st[r.k],r])), max=Math.max(...rows.map(r=>r.n),1);
+  el.innerHTML=Object.entries(TILE).map(([ab,[r,c]])=>{
+    const d=by.get(ab), v=d?d.n:0;
+    const a=v?0.16+0.84*Math.pow(v/max,.42):0.05;
+    return `<div class="tile${F.st===ab?' sel':''}" data-st="${ab}"
+      style="background:rgba(88,166,255,${a.toFixed(3)});grid-row:${r};grid-column:${c}"
+      data-tip="${ab} · ${fmt(v)} petitions${d?' · med '+money(d.med):''}">
+      ${ab}<small>${v?(v>=1000?(v/1000).toFixed(v>=10000?0:1)+'k':v):''}</small></div>`;}).join('');
+  el.querySelectorAll('.tile').forEach(t=>t.onclick=()=>{
+    F.st=F.st===t.dataset.st?'':t.dataset.st; $('#fst').value=F.st; refresh();});
+}
+
+/* ---------------- table ---------------- */
+const GTAG=['t-b','t-p','t-g','t-a','t-r','t-c','t-y','t-p','t-a','t-g','t-n'];
+let ROWS=[];
+const rowH=()=>VIEW==='raw'?34:40;
+function topSocFor(e){let b=-1,bn=-1;
+  for(let i=EOFF[e];i<EOFF[e+1];i++) if(MASK[i]&&P.n[i]>bn){bn=P.n[i];b=P.s[i];}
+  return b>=0?D.soc[b]:'';}
+const COLS={
+ emp:[
+  {k:'name',t:'Employer',w:'2.5fr',sortv:r=>D.emp[r.k],csv:r=>D.emp[r.k],
+   csv2:['Headquarters',r=>D.empmeta.hq[r.k]||''],
+   get:r=>`<div class="nm">${esc(D.emp[r.k])}</div><div class="sub">${esc(D.empmeta.hq[r.k]||'')}</div>`},
+  {k:'n',t:'Petitions',w:'.85fr',num:1,get:r=>fmt(r.n),csv:r=>r.n},
+  {k:'nw',t:'New pos.',w:'.85fr',num:1,csv:r=>r.nw,csv2:['New pos. %',r=>(r.newr*100).toFixed(1)],
+   get:r=>`${fmt(r.nw)} <span class="sub">${pct(r.newr)}</span>`},
+  {k:'w',t:'Workers',w:'.9fr',num:1,csv:r=>r.w,csv2:['Positions per LCA',r=>r.n?(r.w/r.n).toFixed(1):''],
+   get:r=>{const x=r.n?r.w/r.n:0;return fmt(r.w)+(x>=10?` <span class="tag t-a" data-tip="Blanket filings — ${x.toFixed(0)} positions per LCA (file median is 1). Typical of staffing agencies; read as capacity, not hires.">${x.toFixed(0)}×</span>`:'');}},
+  {k:'med',t:'Median wage',w:'1fr',num:1,csv:r=>Math.round(r.med)||'',
+   csv2:['Median is exact',r=>r.exact?'yes':'estimated'],
+   get:r=>`${money(r.med)}${r.exact?'':'<span class="sub" title="estimated from filtered subset">≈</span>'}`},
+  {k:'lvl',t:'Avg level',w:'.7fr',num:1,get:r=>r.lvl?r.lvl.toFixed(1):'—',csv:r=>r.lvl?r.lvl.toFixed(2):''},
+  {k:'pwr',t:'vs prevailing',w:'.9fr',num:1,csv:r=>r.pwr?(r.pwr*100).toFixed(0):'',
+   get:r=>r.pwr?`<span class="tag ${r.pwr>=1.15?'t-g':r.pwr>=1.02?'t-b':'t-a'}">${(r.pwr*100).toFixed(0)}%</span>`:'—'},
+  {k:'top',t:'Top role',w:'1.4fr',nosort:1,get:r=>esc(topSocFor(r.k)),csv:r=>topSocFor(r.k)},
+  {k:'dep',t:'Dep.',w:'.55fr',num:1,sortv:r=>D.empmeta.dep[r.k],csv:r=>D.empmeta.dep[r.k]>=50?'yes':'no',
+   get:r=>D.empmeta.dep[r.k]>=50?'<span class="tag t-a">Yes</span>':'<span class="sub">No</span>'},
+ ],
+ role:[
+  {k:'name',t:'Occupation (SOC)',w:'2.3fr',sortv:r=>D.soc[r.k],csv:r=>D.soc[r.k],
+   get:r=>`<div class="nm">${esc(D.soc[r.k])}</div>`},
+  {k:'grp',t:'Group',w:'1.3fr',sortv:r=>D.grp[D.socgrp[r.k]],csv:r=>D.grp[D.socgrp[r.k]],
+   get:r=>`<span class="tag ${GTAG[D.socgrp[r.k]]}">${esc(D.grp[D.socgrp[r.k]])}</span>`},
+  {k:'emps',t:'Employers',w:'.9fr',num:1,get:r=>fmt(r.emps),csv:r=>r.emps},
+  {k:'n',t:'Petitions',w:'.9fr',num:1,get:r=>fmt(r.n),csv:r=>r.n},
+  {k:'nw',t:'New pos.',w:'.85fr',num:1,get:r=>fmt(r.nw),csv:r=>r.nw},
+  {k:'p25',t:'25th pct',w:'.85fr',num:1,sortv:r=>D.socbench.p25[r.k],
+   csv:r=>D.socbench.p25[r.k]*500||'',get:r=>money(D.socbench.p25[r.k]*500)},
+  {k:'med',t:'Median',w:'.9fr',num:1,get:r=>money(r.med),csv:r=>Math.round(r.med)||''},
+  {k:'p75',t:'75th pct',w:'.85fr',num:1,sortv:r=>D.socbench.p75[r.k],
+   csv:r=>D.socbench.p75[r.k]*500||'',get:r=>money(D.socbench.p75[r.k]*500)},
+  {k:'p90',t:'90th pct',w:'.85fr',num:1,sortv:r=>D.socbench.p90[r.k],
+   csv:r=>D.socbench.p90[r.k]*500||'',get:r=>money(D.socbench.p90[r.k]*500)},
+  {k:'lvl',t:'Avg level',w:'.7fr',num:1,get:r=>r.lvl?r.lvl.toFixed(1):'—',csv:r=>r.lvl?r.lvl.toFixed(2):''},
+ ],
+ loc:[
+  {k:'name',t:'Location',w:'2.2fr',sortv:r=>D.city[r.k],csv:r=>D.city[r.k],
+   get:r=>`<div class="nm">${esc(D.city[r.k])}</div>`},
+  {k:'emps',t:'Employers',w:'1fr',num:1,get:r=>fmt(r.emps),csv:r=>r.emps},
+  {k:'n',t:'Petitions',w:'1fr',num:1,get:r=>fmt(r.n),csv:r=>r.n},
+  {k:'nw',t:'New pos.',w:'1fr',num:1,get:r=>fmt(r.nw),csv:r=>r.nw},
+  {k:'med',t:'Median wage',w:'1.1fr',num:1,get:r=>money(r.med),csv:r=>Math.round(r.med)||''},
+  {k:'lvl',t:'Avg level',w:'.9fr',num:1,get:r=>r.lvl?r.lvl.toFixed(1):'—',csv:r=>r.lvl?r.lvl.toFixed(2):''},
+  {k:'pwr',t:'vs prevailing',w:'1fr',num:1,csv:r=>r.pwr?(r.pwr*100).toFixed(0):'',
+   get:r=>r.pwr?(r.pwr*100).toFixed(0)+'%':'—'},
+ ],
+ raw:[
+  {k:'name',t:'Employer',w:'2fr',sortv:r=>D.emp[P.e[r.i]],csv:r=>D.emp[P.e[r.i]],
+   get:r=>`<div class="nm">${esc(D.emp[P.e[r.i]])}</div>`},
+  {k:'per',t:'Period',w:'.75fr',sortv:r=>P.q[r.i],csv:r=>D.periods[P.q[r.i]],
+   get:r=>`<span class="tag t-n">${D.periods[P.q[r.i]].replace('FY','')}</span>`},
+  {k:'soc',t:'Occupation',w:'1.6fr',sortv:r=>D.soc[P.s[r.i]],csv:r=>D.soc[P.s[r.i]],
+   get:r=>esc(D.soc[P.s[r.i]])},
+  {k:'grp',t:'Group',w:'1fr',sortv:r=>D.grp[D.socgrp[P.s[r.i]]],csv:r=>D.grp[D.socgrp[P.s[r.i]]],
+   get:r=>`<span class="tag ${GTAG[D.socgrp[P.s[r.i]]]}">${esc(D.grp[D.socgrp[P.s[r.i]]].split(' ')[0])}</span>`},
+  {k:'jt',t:'Job title',w:'1.6fr',sortv:r=>D.jt[K.j[P.k[r.i]]],csv:r=>D.jt[K.j[P.k[r.i]]],
+   get:r=>esc(D.jt[K.j[P.k[r.i]]])},
+  {k:'city',t:'Location',w:'1.2fr',sortv:r=>D.city[K.c[P.k[r.i]]],csv:r=>D.city[K.c[P.k[r.i]]],
+   get:r=>esc(D.city[K.c[P.k[r.i]]])},
+  {k:'n',t:'Petitions',w:'.8fr',num:1,sortv:r=>P.n[r.i],csv:r=>P.n[r.i],get:r=>fmt(P.n[r.i])},
+  {k:'nw',t:'New',w:'.6fr',num:1,sortv:r=>P.nw[r.i],csv:r=>P.nw[r.i],get:r=>fmt(P.nw[r.i])},
+  {k:'p50',t:'Median',w:'.9fr',num:1,sortv:r=>P.p50[r.i],csv:r=>P.p50[r.i]||'',get:r=>money(P.p50[r.i])},
+  {k:'lvl',t:'Lvl',w:'.5fr',num:1,sortv:r=>P.lvl[r.i],csv:r=>P.lvl[r.i]?(P.lvl[r.i]/10).toFixed(1):'',
+   get:r=>P.lvl[r.i]?(P.lvl[r.i]/10).toFixed(1):'—'},
+ ],
+ trend:[
+  {k:'name',t:'Employer',w:'2.2fr',sortv:r=>D.emp[r.k],csv:r=>D.emp[r.k],
+   get:r=>`<div class="nm">${esc(D.emp[r.k])}</div><div class="sub">${esc(D.empmeta.hq[r.k]||'')}</div>`},
+  {k:'spark',t:'Trend',w:'.9fr',nosort:1,csv:r=>r.series.join(' '),
+   get:r=>sparkline(r.series)},
+  {k:'a',t:'',w:'.9fr',num:1,sortv:r=>r.a,get:r=>fmt(r.a),csv:r=>r.a},
+  {k:'b',t:'',w:'.9fr',num:1,sortv:r=>r.b,get:r=>fmt(r.b),csv:r=>r.b},
+  {k:'delta',t:'Change',w:'.9fr',num:1,csv:r=>r.a?(r.delta*100).toFixed(1):'',
+   sortv:r=>isFinite(r.delta)?r.delta:1000+r.b,   // "new" ranks top, ordered by volume not alphabet
+   get:r=>r.a?`<span class="${r.delta>=0?'up':'dn'}">${signed(r.delta)}</span>`:'<span class="tag t-g">new</span>'},
+  {k:'nwb',t:'New pos.',w:'.85fr',num:1,get:r=>fmt(r.nwb),csv:r=>r.nwb},
+  {k:'medb',t:'Median wage',w:'1fr',num:1,get:r=>money(r.medb),csv:r=>Math.round(r.medb)||''},
+  {k:'medd',t:'Wage change',w:'1fr',num:1,csv:r=>r.meda&&r.medb?(r.medd*100).toFixed(1):'',
+   get:r=>r.meda&&r.medb?`<span class="${r.medd>=0?'up':'dn'}">${signed(r.medd)}</span>`:'—'},
+ ],
+};
+function renderTable(){
+  const cols=COLS[VIEW], s=SORT[VIEW], RH=rowH();
+  const tpl=cols.map(c=>c.w).join(' ');
+  $('#tblwrap').innerHTML=`<div class="thead" style="display:grid;grid-template-columns:${tpl}">`+
+    cols.map(c=>`<div data-k="${c.k}" class="${s.k===c.k?'act':''}${c.num?' num':''}"
+      style="justify-content:${c.num?'flex-end':'flex-start'}">${c.t}${s.k===c.k?
+      `<span class="arw">${s.d<0?'▼':'▲'}</span>`:''}</div>`).join('')+
+    `</div><div id="vport"><div id="spacer"></div></div>`;
+  const cnt=ROWS.length, vp=$('#vport');
+  $('#spacer').style.height=(cnt*RH)+'px';
+  const draw=()=>{
+    const st=vp.scrollTop, n=Math.ceil(vp.clientHeight/RH)+3, s0=Math.max(0,Math.floor(st/RH)-1);
+    let html='';
+    for(let i=s0;i<Math.min(cnt,s0+n);i++){
+      html+=`<div class="tr" data-i="${i}" style="top:${i*RH}px;height:${RH}px;display:grid;grid-template-columns:${tpl}">`+
+        cols.map(c=>`<div class="${c.num?'num':''}">${c.get(ROWS[i])}</div>`).join('')+`</div>`;
+    }
+    $('#spacer').innerHTML=html;
+    $$('#spacer .tr').forEach(tr=>tr.onclick=()=>{
+      const r=ROWS[+tr.dataset.i];
+      openDrawer(VIEW==='raw'?P.e[r.i]:(VIEW==='emp'||VIEW==='trend'?r.k:null));});
+  };
+  vp.onscroll=draw; draw();
+  $$('.thead div').forEach(d=>d.onclick=()=>{
+    const c=cols.find(x=>x.k===d.dataset.k); if(c&&c.nosort) return;
+    if(s.k===d.dataset.k) s.d*=-1; else {s.k=d.dataset.k;s.d=-1;}
+    sortRows(); renderTable();});
+}
+function sortRows(){
+  const cols=COLS[VIEW], s=SORT[VIEW];
+  const c=cols.find(x=>x.k===s.k)||cols[1];
+  const gv=c.sortv||(r=>r[s.k]);
+  ROWS.sort((a,b)=>{const x=gv(a),y=gv(b);
+    return typeof x==='string'?s.d*x.localeCompare(y):s.d*((x||0)-(y||0));});
+}
+
+/* ---------------- KPIs ---------------- */
+function kpis(){
+  let n=0,w=0,nw=0,den=0,cert=0; const emps=new Set(),vals=[],wts=[];
+  for(let i=0;i<P.N;i++){ if(!MASK[i])continue;
+    n+=P.n[i];w+=P.w[i];nw+=P.nw[i];den+=P.den[i];cert+=P.cert[i];emps.add(P.e[i]);
+    if(P.p50[i]>0){vals.push(P.p50[i]);wts.push(P.n[i]);}}
+  let med=weightedMedian(vals,wts), exact=false;
+  if(!narrowed()){med=D.meta.medwage;exact=true;}
+  const cards=[
+    ['Petitions',fmt(n),`${pct(n/D.meta.rows)} of full dataset`],
+    ['Employers',fmt(emps.size),'distinct sponsors'],
+    ['Worker positions',fmt(w),'total requested'],
+    ['Net-new positions',fmt(nw),`${pct(nw/(w||1))} of all positions`],
+    ['Median wage',money(med),exact?'annualized, exact':'annualized, estimated'],
+    ['Denial rate',pct(den/((den+cert)||1)),`${fmt(den)} denied`],
+  ];
+  $('#kpis').innerHTML=cards.map(([k,v,s])=>
+    `<div class="kpi"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join('');
+}
+
+/* ---------------- views ---------------- */
+function periodPanel(){
+  const ser=periodSeries();
+  return {ser, html:`<div class="panel"><h3>Petitions by fiscal quarter
+      <em>click a bar to select that period</em></h3>
+      <div class="body"><canvas id="cper"></canvas></div></div>`};
+}
+function drawPeriodPanel(ser){
+  const cv=$('#cper'); if(!cv) return;
+  barSeries(cv,[...ser],D.periods.map(p=>p.replace('FY','')),
+    {sel:i=>allPeriods()||F.pers.has(i),height:170});
+  cv.onclick=e=>{
+    const r=cv.getBoundingClientRect(), pad=46, iw=(r.width-pad-8)/D.periods.length;
+    const i=Math.floor((e.clientX-r.left-pad)/iw);
+    if(i<0||i>=D.periods.length) return;
+    if(allPeriods()){F.pers=new Set([i]);}
+    else {F.pers.has(i)?F.pers.delete(i):F.pers.add(i); if(!F.pers.size)F.pers=new Set();}
+    refresh();};
+  cv.style.cursor='pointer';
+}
+function viewEmp(){
+  ROWS=rollEmp(); sortRows();
+  const pp=periodPanel();
+  $('#views').innerHTML=`
+    <div class="grid g3">
+      <div class="panel"><h3>Top sponsors <em>by petitions, current filter</em></h3>
+        <div class="body"><canvas id="c1"></canvas></div></div>
+      <div class="panel"><h3>Where the jobs are <em>click a state to filter</em></h3>
+        <div class="body"><div id="tiles"></div></div></div>
+    </div>
+    <div class="grid g2">
+      <div class="panel"><h3>Wage distribution <em>annualized, weighted by petitions</em></h3>
+        <div class="body"><canvas id="c2"></canvas></div></div>
+      ${pp.html}
+    </div>
+    <div class="tbar"><div class="cnt"><b>${fmt(ROWS.length)}</b> employers match</div>
+      <div class="cnt" style="color:var(--mu2);font-size:11.5px">Wages annualized · median exact when
+        unfiltered, marked ≈ when estimated from a filtered slice</div></div>
+    <div id="tblwrap"></div>`;
+  hbar($('#c1'),[...ROWS].sort((a,b)=>b.n-a.n).slice(0,14).map(r=>({l:D.emp[r.k],v:r.n})));
+  tilemap($('#tiles'),rollSt());
+  const vals=[],wts=[];
+  for(let i=0;i<P.N;i++) if(MASK[i]&&P.p50[i]>0){vals.push(P.p50[i]);wts.push(P.n[i]);}
+  histogram($('#c2'),vals,wts);
+  drawPeriodPanel(pp.ser);
+  renderTable();
+}
+function viewRole(){
+  const rows=rollSoc(), de=distinct(i=>P.s[i]);
+  rows.forEach(r=>r.emps=de.get(r.k)?.size||0);
+  ROWS=rows; sortRows();
+  $('#views').innerHTML=`
+    <div class="grid g2">
+      <div class="panel"><h3>Petitions by occupation group <em>click a bar to filter</em></h3>
+        <div class="body"><div id="gbars"></div></div></div>
+      <div class="panel"><h3>Median wage by occupation group <em>weighted</em></h3>
+        <div class="body"><canvas id="c3"></canvas></div></div>
+    </div>
+    <div class="grid g2">
+      <div class="panel"><h3>Most-sponsored occupations</h3>
+        <div class="body"><canvas id="c1"></canvas></div></div>
+      <div class="panel"><h3>Best-paying occupations <em>median, min. 200 petitions</em></h3>
+        <div class="body"><canvas id="c2"></canvas></div></div>
+    </div>
+    <div class="tbar"><div class="cnt"><b>${fmt(ROWS.length)}</b> occupations match</div></div>
+    <div id="tblwrap"></div>`;
+  const gn=new Float64Array(D.grp.length), gv=[],gw=[];
+  for(let i=0;i<D.grp.length;i++){gv.push([]);gw.push([]);}
+  rows.forEach(r=>{const g=D.socgrp[r.k];gn[g]+=r.n;
+    if(r.med>0){gv[g].push(r.med);gw[g].push(r.n);}});
+  const gtot=gn.reduce((a,b)=>a+b,0)||1, gmax=Math.max(...gn,1);
+  $('#gbars').innerHTML=D.grp.map((g,i)=>({g,i,n:gn[i]})).sort((a,b)=>b.n-a.n).filter(x=>x.n>0)
+    .map(x=>`<div class="grow${F.grps.has(x.i)?' on':''}" data-g="${x.i}">
+      <div class="gl">${esc(x.g)}</div><div class="gt"><i style="width:${(x.n/gmax*100).toFixed(2)}%"></i></div>
+      <div class="gv">${fmt(x.n)}</div><div class="gp">${(x.n/gtot*100).toFixed(1)}%</div></div>`).join('');
+  $$('#gbars .grow').forEach(el=>el.onclick=()=>{
+    const i=+el.dataset.g; F.grps.has(i)?F.grps.delete(i):F.grps.add(i); refresh();});
+  hbar($('#c3'),D.grp.map((g,i)=>({l:g,v:gv[i].length?weightedMedian(gv[i],gw[i]):0}))
+    .filter(d=>d.v>0).sort((a,b)=>b.v-a.v),{f:money,labelW:150,c1:'#238636',c2:'#3fb950'});
+  hbar($('#c1'),[...rows].sort((a,b)=>b.n-a.n).slice(0,14).map(r=>({l:D.soc[r.k],v:r.n})));
+  hbar($('#c2'),[...rows].filter(r=>r.n>=200).sort((a,b)=>b.med-a.med).slice(0,14)
+    .map(r=>({l:D.soc[r.k],v:r.med})),{f:money,c1:'#238636',c2:'#3fb950'});
+  renderTable();
+}
+function viewLoc(){
+  const rows=rollCity(), de=distinct(i=>K.c[P.k[i]]);
+  rows.forEach(r=>r.emps=de.get(r.k)?.size||0);
+  ROWS=rows; sortRows();
+  const st=rollSt();
+  $('#views').innerHTML=`
+    <div class="grid g3">
+      <div class="panel"><h3>Petitions by state</h3><div class="body"><div id="tiles"></div></div></div>
+      <div class="panel"><h3>Top metros</h3><div class="body"><canvas id="c1"></canvas></div></div>
+    </div>
+    <div class="grid g2">
+      <div class="panel"><h3>Highest-paying states <em>median, min. 500 petitions</em></h3>
+        <div class="body"><canvas id="c2"></canvas></div></div>
+      <div class="panel"><h3>Most net-new positions by state</h3>
+        <div class="body"><canvas id="c3"></canvas></div></div>
+    </div>
+    <div class="tbar"><div class="cnt"><b>${fmt(ROWS.length)}</b> cities match</div></div>
+    <div id="tblwrap"></div>`;
+  tilemap($('#tiles'),st);
+  hbar($('#c1'),[...rows].sort((a,b)=>b.n-a.n).slice(0,14).map(r=>({l:D.city[r.k],v:r.n})));
+  hbar($('#c2'),st.filter(r=>r.n>=500).sort((a,b)=>b.med-a.med).slice(0,12)
+    .map(r=>({l:D.st[r.k],v:r.med})),{f:money,labelW:44,c1:'#238636',c2:'#3fb950'});
+  hbar($('#c3'),[...st].sort((a,b)=>b.nw-a.nw).slice(0,12)
+    .map(r=>({l:D.st[r.k],v:r.nw})),{labelW:44,c1:'#8250df',c2:'#bc8cff'});
+  renderTable();
+}
+function viewRaw(){
+  ROWS=[];
+  for(let i=0;i<P.N;i++) if(MASK[i]) ROWS.push({i,n:P.n[i]});
+  const s=SORT.raw, c=COLS.raw.find(x=>x.k===s.k)||COLS.raw[6], gv=c.sortv;
+  ROWS.sort((a,b)=>{const x=gv(a),y=gv(b);
+    return typeof x==='string'?s.d*x.localeCompare(y):s.d*((x||0)-(y||0));});
+  $('#views').innerHTML=`
+    <div class="note"><b>Explorer</b> shows one row per employer × occupation × state × fiscal quarter —
+      ${fmt(P.N)} rows in total. Median is the 50th percentile of annualized offered pay within that
+      combination and quarter. Click any row for the full employer profile.</div>
+    <div class="tbar"><div class="cnt"><b>${fmt(ROWS.length)}</b> combinations match</div></div>
+    <div id="tblwrap"></div>`;
+  renderTable();
+}
+
+/* ---------------- trends view ---------------- */
+function comparePeriods(){
+  // choose two comparable periods: if the user picked exactly two, use those;
+  // otherwise default to the most recent pair of same-quarter periods available.
+  if(F.pers.size===2){const a=[...F.pers].sort((x,y)=>x-y);return a;}
+  const n=D.periods.length;
+  const q=i=>D.periods[i].slice(-2);
+  for(let b=n-1;b>0;b--) for(let a=b-1;a>=0;a--)
+    if(q(a)===q(b)) return [a,b];
+  return [n-2,n-1];
+}
+function viewTrend(){
+  const [A,B]=comparePeriods();
+  const mA=computeMask({skipPeriods:true}), mB=mA;   // period applied manually below
+  const nA=new Float64Array(D.emp.length), nB=new Float64Array(D.emp.length);
+  const nwB=new Float64Array(D.emp.length);
+  const vA=new Array(D.emp.length).fill(null), wA=new Array(D.emp.length).fill(null);
+  const vB=new Array(D.emp.length).fill(null), wB=new Array(D.emp.length).fill(null);
+  const series=new Map();
+  for(let i=0;i<P.N;i++){
+    if(!mA[i]) continue;
+    const e=P.e[i], qi=P.q[i];
+    if(!series.has(e)) series.set(e,new Float64Array(D.periods.length));
+    series.get(e)[qi]+=P.n[i];
+    if(qi===A){ nA[e]+=P.n[i]; if(P.p50[i]>0){(vA[e]||(vA[e]=[])).push(P.p50[i]);(wA[e]||(wA[e]=[])).push(P.n[i]);} }
+    if(qi===B){ nB[e]+=P.n[i]; nwB[e]+=P.nw[i];
+      if(P.p50[i]>0){(vB[e]||(vB[e]=[])).push(P.p50[i]);(wB[e]||(wB[e]=[])).push(P.n[i]);} }
+  }
+  const rows=[];
+  series.forEach((ser,e)=>{
+    const a=nA[e], b=nB[e];
+    if(a+b===0) return;
+    const meda=vA[e]?weightedMedian(vA[e],wA[e]):0, medb=vB[e]?weightedMedian(vB[e],wB[e]):0;
+    rows.push({k:e,series:[...ser],a,b,nwb:nwB[e],meda,medb,
+      delta:a?(b-a)/a:(b>0?Infinity:0),
+      medd:(meda&&medb)?(medb-meda)/meda:0});
+  });
+  COLS.trend[2].t=D.periods[A].replace('FY','');
+  COLS.trend[3].t=D.periods[B].replace('FY','');
+  ROWS=rows.filter(r=>r.a+r.b>=MINV); sortRows();
+  const totA=rows.reduce((s,r)=>s+r.a,0), totB=rows.reduce((s,r)=>s+r.b,0);
+  const grew=ROWS.filter(r=>r.b>r.a).length, shrank=ROWS.filter(r=>r.b<r.a).length;
+  const fresh=rows.filter(r=>r.a===0&&r.b>0).length, gone=rows.filter(r=>r.a>0&&r.b===0).length;
+  const ser=periodSeries(mA);
+  $('#views').innerHTML=`
+    <div class="note"><b>Comparing ${D.periods[A]} → ${D.periods[B]}.</b>
+      These are the same fiscal quarter a year apart, which is the only like-for-like comparison this
+      dataset supports — filing volume is strongly seasonal, so comparing adjacent quarters would
+      mislead. Select exactly two period chips above to compare any other pair.
+      Rows below need at least ${MINV} petitions across the two periods, and sort by ${D.periods[B]} volume until you click another column.</div>
+    <div id="kpi2" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+      <div class="kpi"><div class="k">${D.periods[A]}</div><div class="v">${fmt(totA)}</div>
+        <div class="s">petitions</div></div>
+      <div class="kpi"><div class="k">${D.periods[B]}</div><div class="v">${fmt(totB)}</div>
+        <div class="d ${totB>=totA?'up':'dn'}">${totA?signed((totB-totA)/totA):'—'} year over year</div></div>
+      <div class="kpi"><div class="k">Grew</div><div class="v">${fmt(grew)}</div>
+        <div class="s">employers filed more</div></div>
+      <div class="kpi"><div class="k">Shrank</div><div class="v">${fmt(shrank)}</div>
+        <div class="s">employers filed fewer</div></div>
+      <div class="kpi"><div class="k">New or returning</div><div class="v">${fmt(fresh)}</div>
+        <div class="s">filed in ${D.periods[B]}, not ${D.periods[A]}</div></div>
+      <div class="kpi"><div class="k">Went quiet</div><div class="v">${fmt(gone)}</div>
+        <div class="s">filed in ${D.periods[A]}, not ${D.periods[B]}</div></div>
+    </div>
+    <div class="grid g2">
+      <div class="panel"><h3>Petitions by fiscal quarter <em>click a bar to select that period</em></h3>
+        <div class="body"><canvas id="cper"></canvas></div></div>
+      <div class="panel"><h3>Biggest movers <em>absolute change, ${D.periods[A]} → ${D.periods[B]}</em></h3>
+        <div class="body"><canvas id="cmov"></canvas></div></div>
+    </div>
+    <div class="tbar"><div class="cnt"><b>${fmt(ROWS.length)}</b> employers with ${MINV}+ petitions across both periods</div></div>
+    <div id="tblwrap"></div>`;
+  drawPeriodPanel(ser);
+  const movers=[...ROWS].sort((a,b)=>Math.abs(b.b-b.a)-Math.abs(a.b-a.a)).slice(0,14)
+    .map(r=>({l:D.emp[r.k],v:r.b-r.a}));
+  const mx=Math.max(...movers.map(m=>Math.abs(m.v)),1);
+  hbarSigned($('#cmov'),movers,mx);
+  renderTable();
+}
+const MINV=10;
+function hbarSigned(cv,items,max){
+  if(!items.length){cv.style.height='0';return;}
+  const {x,w}=hidpi(cv,items.length*22+8);
+  const lw=150, mid=lw+(w-lw-12)/2, half=(w-lw-12)/2;
+  x.strokeStyle='#252e3b';x.beginPath();x.moveTo(mid,0);x.lineTo(mid,items.length*22+2);x.stroke();
+  items.forEach((d,i)=>{
+    const y=i*22+4, bw=Math.max(1,half*Math.abs(d.v)/max*0.9);
+    x.fillStyle='#8b98a9';x.font='11.5px ui-sans-serif,system-ui';x.textAlign='right';
+    let lab=d.l;
+    if(x.measureText(lab).width>lw-8){
+      while(lab.length>3&&x.measureText(lab+'…').width>lw-8) lab=lab.slice(0,-1); lab+='…';}
+    x.fillText(lab,lw-6,y+12);
+    x.fillStyle=d.v>=0?'#238636':'#a4272a';
+    x.beginPath();x.roundRect(d.v>=0?mid:mid-bw,y+2,bw,14,3);x.fill();
+    x.fillStyle=d.v>=0?'#56d364':'#ff7b72';x.font='600 11px ui-sans-serif,system-ui';
+    x.textAlign=d.v>=0?'left':'right';
+    x.fillText((d.v>=0?'+':'')+fmt(d.v),d.v>=0?mid+bw+6:mid-bw-6,y+12);
+  });
+}
+
+/* ---------------- insights ---------------- */
+function viewIns(){
+  const emp=rollEmp(), soc=rollSoc();
+  const big=emp.filter(r=>r.n>=25);
+  const growth=[...big].sort((a,b)=>(b.newr-a.newr)||(b.n-a.n)).slice(0,12);
+  const payers=[...big].filter(r=>r.med>0&&r.n>=50).sort((a,b)=>(b.pwr-a.pwr)||(b.n-a.n)).slice(0,12);
+  const senior=[...big].sort((a,b)=>(b.lvl-a.lvl)||(b.n-a.n)).slice(0,12);
+  const denial=emp.filter(r=>r.den>=3).sort((a,b)=>(b.denr-a.denr)||(b.den-a.den)).slice(0,12);
+  const card=(t,sub,rows,fn,f)=>`
+    <div class="panel"><h3>${t} <em>${sub}</em></h3><div class="body"><table class="dt"><tbody>
+      ${rows.map(r=>`<tr><td title="${esc(D.emp[r.k])}"
+        style="width:100%;max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(D.emp[r.k])}</td>
+        <td class="num sub">${fmt(r.n)}</td>
+        <td class="num" style="font-weight:600;width:76px">${f(fn(r))}</td></tr>`).join('')}
+    </tbody></table></div></div>`;
+  $('#views').innerHTML=`
+    <div class="note">Rankings use the current filters and period selection, limited to employers with
+      enough volume to be meaningful (25+ petitions, 50+ for the pay ranking, 3+ denials for the denial
+      ranking). Ties break by petition volume, so the largest employer at a given rate appears first
+      rather than whoever comes first alphabetically.</div>
+    <div class="grid g2">
+      ${card('Actually growing headcount','share of positions that are net-new · 25+ petitions',growth,r=>r.newr,pct)}
+      ${card('Pays furthest above prevailing wage','offered ÷ required minimum',payers,r=>r.pwr,v=>(v*100).toFixed(0)+'%')}
+    </div>
+    <div class="grid g2">
+      ${card('Hires the most senior roles','average prevailing-wage level (1–4)',senior,r=>r.lvl,v=>v.toFixed(2))}
+      ${card('Highest denial rate','denied ÷ decided · 3+ denials',denial,r=>r.denr,pct)}
+    </div>
+    <div class="grid g2">
+      <div class="panel"><h3>Wage spread by occupation <em>25th–75th percentile, top 14 by volume</em></h3>
+        <div class="body" id="spread"></div></div>
+      <div class="panel"><h3>Concentration <em>share of petitions held by the top N sponsors</em></h3>
+        <div class="body"><canvas id="c9"></canvas></div></div>
+    </div>`;
+  const top=[...soc].sort((a,b)=>b.n-a.n).slice(0,14);
+  const gmax=Math.max(...top.map(r=>D.socbench.p75[r.k]*500),1);
+  $('#spread').innerHTML=`<table class="dt"><tbody>${top.map(r=>{
+    const a=D.socbench.p25[r.k]*500,b=D.socbench.p75[r.k]*500;
+    return `<tr><td title="${esc(D.soc[r.k])}"
+      style="width:100%;max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(D.soc[r.k])}</td>
+      <td style="width:46%;min-width:120px"><div class="wbar"><i style="left:${a/gmax*100}%;
+        width:${Math.max(2,(b-a)/gmax*100)}%"></i></div></td>
+      <td class="num" style="width:74px;font-weight:600">${money(r.med)}</td></tr>`;}).join('')}</tbody></table>`;
+  const tot=emp.reduce((s,r)=>s+r.n,0)||1, sorted=[...emp].sort((a,b)=>b.n-a.n);
+  const marks=[10,25,50,100,250,500,1000], cum=[]; let run=0,ci=0;
+  for(let i=0;i<sorted.length&&ci<marks.length;i++){run+=sorted[i].n;
+    if(i+1===marks[ci]){cum.push({l:'Top '+marks[ci],v:run/tot});ci++;}}
+  hbar($('#c9'),cum,{f:pct,labelW:66,c1:'#8250df',c2:'#bc8cff',height:cum.length*22+8});
+}
+
+/* ---------------- drawer ---------------- */
+function openDrawer(e){
+  if(e==null) return;
+  const rows=[]; for(let i=EOFF[e];i<EOFF[e+1];i++) rows.push(i);
+  if(!rows.length) return;
+  const inPer=i=>allPeriods()||F.pers.has(P.q[i]);
+  const sel=rows.filter(inPer);
+  const use=sel.length?sel:rows;
+  let n=0,w=0,nw=0,ct=0,den=0,cert=0; const vals=[],wts=[];
+  use.forEach(i=>{n+=P.n[i];w+=P.w[i];nw+=P.nw[i];ct+=P.ct[i];den+=P.den[i];cert+=P.cert[i];
+    if(P.p50[i]>0){vals.push(P.p50[i]);wts.push(P.n[i]);}});
+  const med=allPeriods()?(D.empwage.p50[e]*500||weightedMedian(vals,wts)):weightedMedian(vals,wts);
+  const wp25=D.empwage.p25[e]*500, wp75=D.empwage.p75[e]*500;
+  $('#dname').textContent=D.emp[e];
+  const law=D.lawmap.get(e);
+  $('#dmeta').innerHTML=[esc(D.empmeta.hq[e]||''),
+    D.empmeta.naics[e]?'NAICS '+esc(D.empmeta.naics[e]):'',
+    D.empmeta.dep[e]>=50?'<span class="tag t-a">H-1B dependent</span>':'',
+    D.empmeta.wv[e]>0?'<span class="tag t-r">Willful violator</span>':'',
+    allPeriods()?'':`<span class="tag t-b">${[...F.pers].sort((a,b)=>a-b).map(p=>D.periods[p]).join(', ')}</span>`
+  ].filter(Boolean).join(' &nbsp;·&nbsp; ');
+  const byRole=new Map(),byLoc=new Map(),byTitle=new Map();
+  use.forEach(i=>{const kk=P.k[i];
+    for(const [m,key] of [[byRole,D.soc[P.s[i]]],[byLoc,D.city[K.c[kk]]],[byTitle,D.jt[K.j[kk]]]]){
+      const o=m.get(key)||{n:0,nw:0,v:[],w:[],lvl:0,lw:0};
+      o.n+=P.n[i];o.nw+=P.nw[i];
+      if(P.p50[i]>0){o.v.push(P.p50[i]);o.w.push(P.n[i]);}
+      if(P.lvl[i]>0){o.lvl+=P.lvl[i]*P.n[i];o.lw+=P.n[i];}
+      m.set(key,o);}});
+  const tbl=(m,label,extra)=>{
+    const arr=[...m.entries()].sort((a,b)=>b[1].n-a[1].n).slice(0,14);
+    const mx=Math.max(...arr.map(x=>x[1].n),1);
+    return `<table class="dt"><thead><tr><th>${label}</th><th class="num">Petitions</th>
+      <th class="num">New</th><th class="num">Median</th>${extra?'<th class="num">Lvl</th>':''}</tr></thead>
+      <tbody>${arr.map(([k,o])=>`<tr><td title="${esc(k)}"
+        style="width:100%;max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(k)}</td>
+        <td class="num"><div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+          <div class="wbar" style="width:34px"><i style="width:${o.n/mx*100}%"></i></div>${fmt(o.n)}</div></td>
+        <td class="num sub">${fmt(o.nw)}</td><td class="num">${money(weightedMedian(o.v,o.w))}</td>
+        ${extra?`<td class="num sub">${o.lw?(o.lvl/o.lw/10).toFixed(1):'—'}</td>`:''}</tr>`).join('')}
+      </tbody></table>`;};
+  // per-period history (always full history, regardless of the period filter)
+  const hist=new Float64Array(D.periods.length), histNew=new Float64Array(D.periods.length);
+  const hv=[],hw=[];
+  for(let p=0;p<D.periods.length;p++){hv.push([]);hw.push([]);}
+  rows.forEach(i=>{hist[P.q[i]]+=P.n[i];histNew[P.q[i]]+=P.nw[i];
+    if(P.p50[i]>0){hv[P.q[i]].push(P.p50[i]);hw[P.q[i]].push(P.n[i]);}});
+  let best=-1,bn=-1; use.forEach(i=>{if(P.n[i]>bn){bn=P.n[i];best=P.s[i];}});
+  const natMed=best>=0?D.socbench.p50[best]*500:0;
+  const nat=(natMed&&med)?`<div class="note" style="margin:0 0 16px"><b>${esc(D.emp[e])}</b> pays a median
+    of <b>${money(med)}</b> against a national median of <b>${money(natMed)}</b> for
+    ${esc(D.soc[best])} — <b class="${med>=natMed?'up':'dn'}">${signed(med/natMed-1)}</b>.</div>`:'';
+  $('#dbody').innerHTML=`${nat}
+    <div class="dsec"><div class="dstat">
+      <div><div class="k">Petitions</div><div class="v">${fmt(n)}</div></div>
+      <div><div class="k">Worker positions</div><div class="v">${fmt(w)}</div></div>
+      <div><div class="k">Net-new</div><div class="v">${fmt(nw)}</div></div>
+      <div><div class="k">Continuing</div><div class="v">${fmt(ct)}</div></div>
+      <div><div class="k">Median wage</div><div class="v">${money(med)}</div></div>
+      <div><div class="k">Denial rate</div><div class="v">${pct(den/((den+cert)||1))}</div></div>
+    </div>
+    ${wp25&&wp75?`<div style="margin-top:9px;font-size:11.5px;color:var(--mu)">
+      Pay range across all periods: <b style="color:var(--tx)">${money(wp25)}</b> (25th pct)
+      &nbsp;—&nbsp; <b style="color:var(--tx)">${money(wp75)}</b> (75th pct)</div>`:''}</div>
+    <div class="dsec"><h4>Filing history by fiscal quarter</h4>
+      <table class="dt"><thead><tr><th>Period</th><th class="num">Petitions</th>
+        <th class="num">Net-new</th><th class="num">Median wage</th></tr></thead><tbody>
+        ${D.periods.map((p,i)=>hist[i]?`<tr><td>${p}</td><td class="num">${fmt(hist[i])}</td>
+          <td class="num sub">${fmt(histNew[i])}</td>
+          <td class="num">${money(weightedMedian(hv[i],hw[i]))}</td></tr>`:'').join('')}
+      </tbody></table></div>
+    <div class="dsec"><h4>Occupations sponsored</h4>${tbl(byRole,'SOC occupation',1)}</div>
+    <div class="dsec"><h4>Actual job titles used</h4>${tbl(byTitle,'Job title')}</div>
+    <div class="dsec"><h4>Worksite locations</h4>${tbl(byLoc,'City')}</div>
+    ${law?`<div class="dsec"><h4>Immigration counsel</h4>
+      <div style="font-size:12.5px">${esc(law)}</div></div>`:''}`;
+  $('#drawer').classList.add('open'); $('#scrim').classList.add('on');
+}
+const closeDrawer=()=>{$('#drawer').classList.remove('open');$('#scrim').classList.remove('on');};
+
+/* ---------------- csv ---------------- */
+function exportCSV(){
+  const cols=COLS[VIEW];
+  const strip=h=>String(h).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').replace(/[—≈]/g,'').trim();
+  const fields=[];
+  cols.forEach(c=>{fields.push([c.t||c.k,r=>c.csv?c.csv(r):strip(c.get(r))]);
+    if(c.csv2) fields.push(c.csv2);});
+  const q=v=>{const s=String(v??'');return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+  const periodNote=allPeriods()?'all periods':[...F.pers].sort((a,b)=>a-b).map(p=>D.periods[p]).join('+');
+  const lines=[`# H-1B Sponsor Explorer — ${VIEW} view — ${periodNote} — ${D.meta.source}`,
+               fields.map(f=>q(f[0])).join(',')];
+  ROWS.forEach(r=>lines.push(fields.map(f=>q(f[1](r))).join(',')));
+  const blob=new Blob([lines.join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`h1b_${VIEW}_${periodNote.replace(/[^\w]/g,'')}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+/* ---------------- chrome: chips, presets, wiring ---------------- */
+// Periods distorted by a known real-world event rather than by the data.
+const PNOTE={'FY2026Q1':'Depressed by the Oct 2025 federal shutdown — OFLC issued almost no decisions '+
+  'between Oct 2 and Oct 31, and Nov/Dec carry the catch-up backlog. Do not compare this quarter '+
+  'against other Q1s at face value.'};
+function renderPeriods(){
+  const ser=periodSeries(computeMask({skipPeriods:true}));
+  const max=Math.max(...ser,1);
+  $('#pers').innerHTML=D.periods.map((p,i)=>
+    `<div class="per${allPeriods()||F.pers.has(i)?' on':''}${PNOTE[p]?' warn':''}" data-p="${i}"
+       data-tip="${p} · ${fmt(ser[i])} petitions under the current filters${PNOTE[p]?' — ⚠ '+PNOTE[p]:''}">
+      <b>${p.replace('FY','')}${PNOTE[p]?' <em>⚠</em>':''}</b>
+      <u>${ser[i]>=1000?(ser[i]/1000).toFixed(0)+'k':fmt(ser[i])}</u>
+      <div class="pb"><i style="width:${(ser[i]/max*100).toFixed(1)}%"></i></div></div>`).join('');
+  $$('#pers .per').forEach(el=>el.onclick=ev=>{
+    const i=+el.dataset.p;
+    if(ev.shiftKey&&F.pers.size){                       // shift-click extends a contiguous run
+      const cur=[...F.pers], lo=Math.min(...cur,i), hi=Math.max(...cur,i);
+      F.pers=new Set(); for(let x=lo;x<=hi;x++) F.pers.add(x);
+    } else if(allPeriods()){ F.pers=new Set([i]); }
+    else { F.pers.has(i)?F.pers.delete(i):F.pers.add(i); }
+    refresh();});
+  const PRESETS=[
+    ['All periods',()=>new Set()],
+    ['Latest quarter',()=>new Set([D.periods.length-1])],
+    ['FY2026',()=>new Set(D.periods.map((p,i)=>p.startsWith('FY2026')?i:-1).filter(i=>i>=0))],
+    ['Jul–Sep, all years',()=>new Set(D.periods.map((p,i)=>p.endsWith('Q4')?i:-1).filter(i=>i>=0))],
+    ['Last 12 months',()=>{const want=['FY2025Q4','FY2026Q1','FY2026Q2','FY2026Q3'];
+      return new Set(D.periods.map((p,i)=>want.includes(p)?i:-1).filter(i=>i>=0));}],
+  ];
+  const eq=s=>{const a=[...F.pers].sort().join(','),b=[...s].sort().join(',');
+    return a===b||(a===''&&s.size===D.periods.length);};
+  $('#psets').innerHTML=PRESETS.map(([lab,f],i)=>{
+    const s=f(); if(lab!=='All periods'&&!s.size) return '';
+    return `<button data-i="${i}" class="${eq(s)?'on':''}">${lab}</button>`;}).join('');
+  $$('#psets button').forEach(b=>b.onclick=()=>{F.pers=PRESETS[+b.dataset.i][1]();refresh();});
+  const totalSel=allPeriods()?ser.reduce((a,b)=>a+b,0)
+    :[...F.pers].reduce((a,i)=>a+ser[i],0);
+  $('#phint').textContent=(allPeriods()?`All ${D.periods.length} quarters`
+    :`${F.pers.size} of ${D.periods.length} quarters`)+` · ${fmt(totalSel)} petitions`;
+  const hit=[...F.pers].map(i=>D.periods[i]).filter(p=>PNOTE[p]);
+  const box=$('#pwarn');
+  if(hit.length&&!allPeriods()){ box.style.display='block';
+    box.innerHTML=`<b>⚠ ${hit.join(', ')}</b> — ${PNOTE[hit[0]]}`; }
+  else box.style.display='none';
+}
+function renderChips(){
+  const c=facet(i=>D.socgrp[P.s[i]],D.grp.length,{skipGroups:true});
+  $('#gchips').innerHTML=D.grp.map((g,i)=>
+    `<div class="gchip${F.grps.has(i)?' on':''}${c[i]?'':' zero'}" data-g="${i}">${esc(g)}
+      <span>${c[i]>=1000?(c[i]/1000).toFixed(c[i]>=10000?0:1)+'k':fmt(c[i])}</span></div>`).join('');
+  $$('#gchips .gchip').forEach(el=>el.onclick=()=>{
+    const i=+el.dataset.g;
+    F.grps.has(i)?F.grps.delete(i):F.grps.add(i);
+    if(F.grps.size) [...F.socs].forEach(s=>{const ix=D.soc.indexOf(s);
+      if(ix>=0&&!F.grps.has(D.socgrp[ix])) F.socs.delete(s);});
+    refresh();});
+  const names=[...F.grps].map(i=>D.grp[i]);
+  $('#ghint').textContent=names.length?names.join(' · '):'All groups included';
+  const pool=F.grps.size?D.soc.filter((s,i)=>F.grps.has(D.socgrp[i])):D.soc;
+  $('#socl').innerHTML=pool.map(s=>`<option value="${esc(s)}">`).join('');
+  $('#fsoc').placeholder=F.grps.size?`Search ${fmt(pool.length)} occupations in group…`
+                                    :'e.g. Software Developers';
+}
+function renderPills(){
+  $('#socpills').innerHTML=[...F.socs].map(s=>
+    `<span class="pill"><b>${esc(s)}</b><i data-s="${esc(s)}">×</i></span>`).join('');
+  $$('#socpills i').forEach(x=>x.onclick=()=>{F.socs.delete(x.dataset.s);refresh();});
+  $('#whint').textContent=F.wage?`Showing groups with median ≥ ${money(F.wage)}`:'No wage floor applied';
+}
+function refresh(){
+  clearMaskCache(); buildMask(); renderPeriods(); renderChips(); kpis();
+  $('#content').classList.toggle('raw',VIEW==='raw');
+  ({emp:viewEmp,role:viewRole,loc:viewLoc,raw:viewRaw,trend:viewTrend,ins:viewIns})[VIEW]();
+  renderPills();
+  const p=new URLSearchParams();
+  if(F.q)p.set('q',F.q); if(F.st)p.set('st',F.st); if(F.city)p.set('city',F.city);
+  if(F.socs.size)p.set('soc',[...F.socs].join('|'));
+  if(F.grps.size)p.set('g',[...F.grps].join(','));
+  if(!allPeriods())p.set('p',[...F.pers].sort((a,b)=>a-b).join(','));
+  if(F.wage)p.set('w',F.wage); if(F.lvl)p.set('lvl',F.lvl);
+  if(VIEW!=='emp')p.set('v',VIEW);
+  history.replaceState(null,'',p.toString()?'#'+p:location.pathname);
+}
+let deb; const debounce=fn=>(...a)=>{clearTimeout(deb);deb=setTimeout(()=>fn(...a),190);};
+function init(){
+  $('#srcline').innerHTML=`${D.meta.source} · ${D.periods.length} fiscal quarters<br>
+    ${D.periods[0]} – ${D.periods[D.periods.length-1]} · ${fmt(D.meta.rows)} petitions
+    · ${fmt(D.meta.employers)} employers`;
+  $('#cityl').innerHTML=D.city.map(s=>`<option value="${esc(s)}">`).join('');
+  $('#fst').innerHTML='<option value="">All states</option>'+
+    D.st.filter(s=>s&&s!=='??').map(s=>`<option>${s}</option>`).join('');
+  $('#q').oninput=debounce(()=>{F.q=$('#q').value;refresh();});
+  $('#fsoc').onchange=()=>{const v=$('#fsoc').value.trim();
+    if(D.soc.includes(v)){F.socs.add(v);$('#fsoc').value='';refresh();}};
+  $('#fst').onchange=()=>{F.st=$('#fst').value;refresh();};
+  $('#fcity').onchange=()=>{F.city=D.city.includes($('#fcity').value)?$('#fcity').value:'';refresh();};
+  $('#fwage').oninput=debounce(()=>{F.wage=parseInt($('#fwage').value.replace(/\D/g,''))||0;refresh();});
+  $('#flvl').onchange=()=>{F.lvl=+$('#flvl').value||0;refresh();};
+  ['fnew|onlyNew','fdep|noDep','fabove|above','fmin3|min3'].forEach(p=>{
+    const [id,k]=p.split('|'); $('#'+id).onchange=()=>{F[k]=$('#'+id).checked;refresh();};});
+  $('#reset').onclick=()=>{
+    Object.assign(F,{q:'',pers:new Set(),grps:new Set(),socs:new Set(),st:'',city:'',
+      wage:0,lvl:0,onlyNew:false,noDep:false,above:false,min3:false});
+    ['q','fsoc','fcity','fwage'].forEach(i=>$('#'+i).value='');
+    ['fst','flvl'].forEach(i=>$('#'+i).value='');
+    ['fnew','fdep','fabove','fmin3'].forEach(i=>$('#'+i).checked=false);
+    refresh();};
+  const closeSide=()=>{$('#side').classList.remove('open');$('#sidescrim').classList.remove('on');};
+  $('#sidetoggle').onclick=()=>{
+    const o=$('#side').classList.toggle('open');
+    $('#sidescrim').classList.toggle('on',o);};
+  $('#sidescrim').onclick=closeSide;
+  addEventListener('resize',()=>{if(innerWidth>900)closeSide();});
+  $('#csv').onclick=exportCSV;
+  $('#about').onclick=()=>$('#modal').classList.add('on');
+  $('#mclose').onclick=()=>$('#modal').classList.remove('on');
+  $('#modal').onclick=e=>{if(e.target.id==='modal')$('#modal').classList.remove('on');};
+  $('#dclose').onclick=closeDrawer; $('#scrim').onclick=closeDrawer;
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){closeDrawer();$('#modal').classList.remove('on');closeSide();}
+    if(e.key==='/'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();$('#q').focus();}});
+  $$('nav button[data-v]').forEach(b=>b.onclick=()=>{
+    $$('nav button[data-v]').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+    VIEW=b.dataset.v;refresh();});
+  const tip=$('#tip');
+  document.addEventListener('mouseover',e=>{
+    const t=e.target.closest('[data-tip]');
+    if(!t){tip.classList.remove('on');return;}
+    tip.textContent=t.dataset.tip;tip.classList.add('on');});
+  document.addEventListener('mousemove',e=>{
+    tip.style.left=Math.min(e.clientX+13,innerWidth-tip.offsetWidth-8)+'px';
+    tip.style.top=(e.clientY+15)+'px';});
+  const h=new URLSearchParams(location.hash.slice(1));
+  if(h.get('q')){F.q=h.get('q');$('#q').value=F.q;}
+  if(h.get('st')){F.st=h.get('st');$('#fst').value=F.st;}
+  if(h.get('city')){F.city=h.get('city');$('#fcity').value=F.city;}
+  if(h.get('soc'))h.get('soc').split('|').forEach(s=>F.socs.add(s));
+  if(h.get('g'))h.get('g').split(',').forEach(s=>F.grps.add(+s));
+  if(h.get('p'))h.get('p').split(',').forEach(s=>F.pers.add(+s));
+  if(h.get('w')){F.wage=+h.get('w');$('#fwage').value=F.wage;}
+  if(h.get('lvl')){F.lvl=+h.get('lvl');$('#flvl').value=F.lvl;}
+  if(h.get('v')){VIEW=h.get('v');$$('nav button[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===VIEW));}
+  let rt; addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(refresh,220);});
+  refresh();
+}
+boot().catch(err=>{
+  $('#loader').innerHTML=`<h1 style="color:#f85149">Failed to load</h1>
+    <p style="max-width:520px;text-align:center">${esc(err.message||err)}</p>`;
+  console.error(err);});
+</script>
+</body>
+</html>

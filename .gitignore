@@ -1,0 +1,24 @@
+# raw DOL spreadsheets - hundreds of MB, download them from dol.gov instead
+data/
+*.xlsx
+
+# pipeline intermediates, all regenerable
+*.parquet
+payload.b64
+payload*.b64
+template.html
+checks.json
+
+# generated single-file build (run pipeline/mkbuilds.py)
+dist/
+
+# runtime output from the self-hosting scripts - never commit these
+site/visits.jsonl
+site/.salt
+stats.html
+
+# misc
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
