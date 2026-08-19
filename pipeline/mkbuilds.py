@@ -17,13 +17,14 @@ elif os.path.exists('site/payload.bin.gz'):
 else:
     sys.exit('No payload found. Run pipeline/ingest.py then pipeline/build.py first.')
 
+os.makedirs('dist', exist_ok=True)
+
 # 1. single file - payload inlined, works from disk, works offline, easy to email
 single = tpl.replace('__PAYLOAD__', b64)
 open('dist/H1B_Sponsor_Explorer.html', 'w').write(single)
 
 # 2. hosted site - payload as a separate gzip the browser caches on its own
 os.makedirs('site', exist_ok=True)
-os.makedirs('dist', exist_ok=True)
 index = tpl.replace('__PAYLOAD__', '')
 open('site/index.html', 'w').write(index)
 raw = base64.b64decode(b64)                      # already gzip-compressed bytes
