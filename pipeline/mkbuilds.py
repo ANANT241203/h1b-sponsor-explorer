@@ -6,7 +6,7 @@ os.chdir(ROOT)
 
 # the template is assembled from src/ in order
 tpl = ''.join(open(f'src/{f}').read() for f in
-              ['head.html', 'app.js', 'app2.js', 'app3.js', 'app4.js'])
+              ['head.html', 'app.js', 'app2.js', 'lottery_data.js', 'app3.js', 'app4.js'])
 open('template.html', 'w').write(tpl)
 
 # prefer the freshly built payload; fall back to the one committed under site/

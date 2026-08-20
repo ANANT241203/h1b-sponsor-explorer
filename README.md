@@ -17,19 +17,21 @@ runs in the visitor's browser.
 | **Locations** | Tile map of the US, top metros, highest-paying states, where net-new positions are |
 | **Explorer** | Every employer × occupation × state × quarter combination, 387,404 rows, sortable on any column |
 | **Trends** | Year-over-year comparison — who grew, who shrank, who appeared, who went quiet |
-| **Insights** | Volume-thresholded rankings: real headcount growth, pay above prevailing, seniority, denial rates |
+| **Insights** | Volume-thresholded rankings: real headcount growth, pay above prevailing, seniority, DOL LCA denial rates |
+| **Lottery** | National USCIS registration history, multiple-registration counts, and FY2027 wage-weighted projections |
 
 Filters (occupation group, role, state, city, wage floor, seniority level, period) apply across every
-view at once. The URL carries filter state, so any view is a shareable link. Export CSV dumps whatever
-is currently on screen.
+DOL LCA view at once. The national USCIS Lottery view is deliberately unfiltered because no public
+registration-level data or registration-to-LCA join key exists. The URL carries filter state, so any
+view is a shareable link. Export CSV dumps whatever is currently on screen.
 
 ![Trends view](docs/screenshot-trends.png)
 
 ## Things it does that the commercial H-1B sites don't
 
 **Net-new vs. renewals.** The single most useful column for a job search. Cognizant filed 5,779
-petitions in FY2026 with **13** net-new positions — they are renewing existing staff, not hiring.
-A raw petition count cannot tell those apart.
+LCAs in FY2026 with **13** net-new positions — they are renewing existing staff, not hiring.
+A raw LCA count cannot tell those apart.
 
 **Employer name canonicalization.** The raw files spell one company many ways ("1x Technologies Inc.",
 "1X Technologies, Inc.", "1x Technologies, Inc"), which fragments its ranking. Case, punctuation and
@@ -39,7 +41,7 @@ genuinely distinct subsidiaries separate.
 **Blanket-filing detection.** One LCA can cover many positions. The file median is 1, but a few
 employers file dozens at a time — Grandison Management filed 1,988 applications each requesting 40
 therapist positions, alone 78% of all worker positions in the Healthcare group. Any employer averaging
-10+ positions per filing is flagged, and rankings sort by petitions rather than positions.
+10+ positions per filing is flagged, and rankings sort by LCAs rather than positions.
 
 **Honest wage estimates.** Exact percentiles are precomputed and used whenever nothing is filtered;
 estimates appear only on filtered slices and are marked `≈`.
@@ -47,6 +49,19 @@ estimates appear only on filtered slices and are marked `≈`.
 **Data caveats surfaced in the UI.** FY2026 Q1 is flagged because the October 2025 federal shutdown
 took DOL's FLAG system offline — 1,388 decisions on 1 October, then one to four per day for the rest
 of the month. The quarter holds roughly two months of decisions, so it is not comparable to another Q1.
+
+## Lottery data and limits
+
+The Lottery view uses USCIS's national H-1B electronic-registration table for FY2021–FY2026 and the
+DHS FY2027 weighted-selection final rule. It reports **selected registrations ÷ eligible
+registrations**, not a visa approval rate or an exact person-level probability. From FY2025 onward,
+USCIS selects unique beneficiaries but its published historical table still reports selected
+registrations.
+
+USCIS does not publish registration-level outcomes, employer-specific selection totals, or a key that
+can join a registration to a DOL LCA. The lottery statistics therefore never respond to the LCA
+filters and are never presented as employer-specific odds. FY2027 wage-level percentages are DHS
+projections from the final rule, not observed outcomes or estimates derived from this dashboard's LCAs.
 
 ## Data
 
@@ -58,7 +73,7 @@ Period coverage is deliberately not continuous: OFLC publishes a cumulative file
 current fiscal year and separate Q4 files for closed years. Periods are selectable chips rather than a
 slider so the gaps stay visible.
 
-Petitions are deduplicated on case number at their **earliest** decision. 5,896 cases appear in two
+LCAs are deduplicated on case number at their **earliest** decision. 5,896 cases appear in two
 source files — in every instance certified once and withdrawn later, a median of 409 days apart — so
 each is counted in the quarter it was certified, not the quarter it was withdrawn. The six quarters
 form a clean partition: selecting several adds them with no double counting.
@@ -74,6 +89,7 @@ pip install pandas pyarrow python-calamine
 # 1. drop LCA_Disclosure_Data_FY*.xlsx into data/ (get them from the DOL link above)
 python3 pipeline/ingest.py     # xlsx -> per-file parquet (skips anything already done)
 python3 pipeline/build.py      # parquet -> compressed payload
+python3 pipeline/fetch_lottery.py # USCIS history + DHS FY2027 projections -> validated JS
 python3 pipeline/mkbuilds.py   # payload + src/ -> dist/ and site/
 ```
 
