@@ -172,6 +172,27 @@ table.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
 .note{background:rgba(88,166,255,.07);border:1px solid rgba(88,166,255,.22);border-radius:var(--r);padding:10px 13px;font-size:12px;color:var(--mu);margin-bottom:14px;line-height:1.55}
 .note b{color:var(--tx);font-weight:600}
 .warn{background:rgba(227,179,65,.07);border-color:rgba(227,179,65,.25)}
+.lottery-hero{display:grid;grid-template-columns:minmax(260px,1.15fr) minmax(260px,.85fr);gap:12px;margin-bottom:16px}
+.lottery-hero .panel .body{height:100%}
+.lottery-rate{display:flex;align-items:baseline;gap:9px;margin:5px 0 2px}
+.lottery-rate strong{font-size:34px;letter-spacing:-1.2px;color:var(--acc);font-variant-numeric:tabular-nums}
+.lottery-rate span{font-size:12px;color:var(--mu)}
+.lottery-flow{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px}
+.lottery-step{background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:9px}
+.lottery-step b{display:block;font-size:11px;color:var(--tx);margin-bottom:3px}
+.lottery-step span{font-size:10.5px;color:var(--mu);line-height:1.4}
+.lottery-bars{display:flex;flex-direction:column;gap:8px}
+.lottery-bar{display:grid;grid-template-columns:48px 1fr 62px;gap:9px;align-items:center}
+.lottery-bar>span{font-size:11px;color:var(--mu);font-variant-numeric:tabular-nums}
+.lottery-bar>span:last-child{text-align:right;color:var(--tx);font-weight:600}
+.lottery-track{height:10px;border-radius:5px;background:var(--bd);overflow:hidden}
+.lottery-track i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#1f6feb,var(--cy))}
+.weight-card{border-top:3px solid var(--acc)}
+.weight-card.level1{border-top-color:var(--mu2)}.weight-card.level2{border-top-color:var(--acc)}
+.weight-card.level3{border-top-color:var(--cy)}.weight-card.level4{border-top-color:var(--grn)}
+.weight-card .v{font-size:25px}.weight-card .s{line-height:1.45}
+.source-list{font-size:11.5px;color:var(--mu);line-height:1.65}
+.source-list a{color:var(--acc);text-decoration:none}.source-list a:hover{text-decoration:underline}
 #modal{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;align-items:center;justify-content:center;z-index:300;padding:24px}
 #modal.on{display:flex}
 .mbox{background:var(--panel);border:1px solid var(--bd2);border-radius:12px;max-width:780px;width:100%;max-height:86vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.6)}
@@ -222,6 +243,8 @@ table.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
   .dstat{grid-template-columns:repeat(2,1fr)}
   .mbox{max-height:92vh}
   .tbar .cnt:nth-child(2){display:none}
+  .lottery-hero{grid-template-columns:1fr}
+  .lottery-flow{grid-template-columns:1fr 1fr}
 }
 @media(max-width:560px){
   #kpis{grid-template-columns:1fr 1fr}
@@ -269,6 +292,7 @@ table.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
   <button data-v="raw">Explorer</button>
   <button data-v="trend">Trends</button>
   <button data-v="ins">Insights</button>
+  <button data-v="lottery">Lottery</button>
 </nav>
 
 <main>
@@ -313,7 +337,7 @@ table.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
       <label class="chk"><input type="checkbox" id="fnew"> Only net-new positions</label>
       <label class="chk"><input type="checkbox" id="fdep"> Exclude H-1B dependent</label>
       <label class="chk"><input type="checkbox" id="fabove"> Pays above prevailing wage</label>
-      <label class="chk"><input type="checkbox" id="fmin3"> 3+ petitions only</label>
+      <label class="chk"><input type="checkbox" id="fmin3"> 3+ LCAs only</label>
       <div class="hint"><b>Net-new</b> = positions flagged NEW_EMPLOYMENT, i.e. genuinely new hires
         rather than renewals of people already on staff.</div>
     </div>
@@ -363,16 +387,21 @@ table.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
       <em>before</em> petitioning USCIS. It proves intent to sponsor, not an approved visa or a filled
       job. Employers routinely file more LCAs than they use, so treat counts as sponsorship appetite
       rather than headcount.</p>
+    <p><b>Three different decisions.</b> A DOL LCA denial, a USCIS cap-registration non-selection,
+      and a USCIS Form I-129 petition denial are separate outcomes at separate stages. Every denial
+      rate elsewhere in this dashboard is the <em>DOL LCA denial rate</em>. The Lottery view uses only
+      USCIS's national aggregate registration table; it is not joined to these LCA records and cannot
+      produce an employer-specific or person-specific lottery rate.</p>
     <p><b>No petition is counted twice.</b> The cumulative Q3 file overlaps the Q4 files: 5,896 cases
       appear in two source files, in every instance because the LCA was certified once and then
       withdrawn later (a median of 409 days later). Each case is kept exactly once, at its
       <em>earliest</em> decision, so a petition certified in July 2023 and withdrawn in May 2026 counts
       in FY2023 Q4 where the sponsorship actually happened, rather than being carried forward into
       FY2026. Selecting several quarters therefore adds them cleanly — FY2026 Q1 + Q2 + Q3 sums to the
-      FY2026 total with nothing repeated, and the six quarters partition all 799,016 petitions.</p>
-    <p><b>Petitions vs. worker positions.</b> One LCA can cover many positions. Across the file the
+      FY2026 total with nothing repeated, and the six quarters partition all 799,016 LCAs.</p>
+    <p><b>LCAs vs. worker positions.</b> One LCA can cover many positions. Across the file the
       median is 1 position per filing, but a few employers file blanket LCAs covering dozens at once.
-      Rankings sort by petitions by default, and any employer averaging 10+ positions per filing is
+      Rankings sort by LCAs by default, and any employer averaging 10+ positions per filing is
       marked with a ×N badge in the Workers column. Read those as sponsorship capacity, not hires.</p>
     <p><b>Wages</b> are annualized (hourly × 2080, monthly × 12, weekly × 52, bi-weekly × 26). Where a
       pay range is filed the midpoint is used. Values below $15k or above $2M are dropped as data-entry
@@ -385,12 +414,12 @@ table.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
       distinct subsidiaries stay separate.</p>
     <p><b>Net-new</b> counts positions flagged NEW_EMPLOYMENT rather than CONTINUED_EMPLOYMENT
       (renewing someone already on staff). This is the most useful column for a job search: a firm
-      filing thousands of petitions that are almost all renewals isn't hiring, it's maintaining.</p>
+      filing thousands of LCAs that are almost all renewals isn't hiring, it's maintaining.</p>
     <p><b>vs prevailing</b> is offered wage ÷ the DOL-determined prevailing wage for that role and area.
       100% means paying exactly the legal floor. Very high values usually mean the occupation's
       prevailing wage comes from a low survey baseline — common in medicine and academia — not that the
       job pays several times market. <b>Level</b> is the DOL prevailing-wage skill level, I (entry)
-      through IV (expert), averaged and weighted by petitions.</p>
+      through IV (expert), averaged and weighted by LCAs.</p>
     <p><b>Occupation groups</b> roll the SOC occupations into 11 categories using the official SOC major
       group (first two digits of the code). Technology &amp; Software is major group 15, Healthcare &amp;
       Medicine is 29 and 31, Education &amp; Academia is 25, and so on; low-volume groups collect into
@@ -575,7 +604,7 @@ function distinct(keyFn){
     if(!s.has(k)) s.set(k,new Set()); s.get(k).add(P.e[i]); }
   return s;
 }
-// petitions per period for the current filters (period filter itself ignored)
+// LCAs per period for the current filters (period filter itself ignored)
 function periodSeries(mask){
   const M=mask||computeMask({skipPeriods:true}), c=new Float64Array(D.periods.length);
   for(let i=0;i<P.N;i++) if(M[i]) c[P.q[i]]+=P.n[i];
@@ -660,7 +689,7 @@ function tilemap(el,rows){
     const a=v?0.16+0.84*Math.pow(v/max,.42):0.05;
     return `<div class="tile${F.st===ab?' sel':''}" data-st="${ab}"
       style="background:rgba(88,166,255,${a.toFixed(3)});grid-row:${r};grid-column:${c}"
-      data-tip="${ab} · ${fmt(v)} petitions${d?' · med '+money(d.med):''}">
+      data-tip="${ab} · ${fmt(v)} LCAs${d?' · med '+money(d.med):''}">
       ${ab}<small>${v?(v>=1000?(v/1000).toFixed(v>=10000?0:1)+'k':v):''}</small></div>`;}).join('');
   el.querySelectorAll('.tile').forEach(t=>t.onclick=()=>{
     F.st=F.st===t.dataset.st?'':t.dataset.st; $('#fst').value=F.st; refresh();});
@@ -678,7 +707,7 @@ const COLS={
   {k:'name',t:'Employer',w:'2.5fr',sortv:r=>D.emp[r.k],csv:r=>D.emp[r.k],
    csv2:['Headquarters',r=>D.empmeta.hq[r.k]||''],
    get:r=>`<div class="nm">${esc(D.emp[r.k])}</div><div class="sub">${esc(D.empmeta.hq[r.k]||'')}</div>`},
-  {k:'n',t:'Petitions',w:'.85fr',num:1,get:r=>fmt(r.n),csv:r=>r.n},
+  {k:'n',t:'LCAs',w:'.85fr',num:1,get:r=>fmt(r.n),csv:r=>r.n},
   {k:'nw',t:'New pos.',w:'.85fr',num:1,csv:r=>r.nw,csv2:['New pos. %',r=>(r.newr*100).toFixed(1)],
    get:r=>`${fmt(r.nw)} <span class="sub">${pct(r.newr)}</span>`},
   {k:'w',t:'Workers',w:'.9fr',num:1,csv:r=>r.w,csv2:['Positions per LCA',r=>r.n?(r.w/r.n).toFixed(1):''],
@@ -699,7 +728,7 @@ const COLS={
   {k:'grp',t:'Group',w:'1.3fr',sortv:r=>D.grp[D.socgrp[r.k]],csv:r=>D.grp[D.socgrp[r.k]],
    get:r=>`<span class="tag ${GTAG[D.socgrp[r.k]]}">${esc(D.grp[D.socgrp[r.k]])}</span>`},
   {k:'emps',t:'Employers',w:'.9fr',num:1,get:r=>fmt(r.emps),csv:r=>r.emps},
-  {k:'n',t:'Petitions',w:'.9fr',num:1,get:r=>fmt(r.n),csv:r=>r.n},
+  {k:'n',t:'LCAs',w:'.9fr',num:1,get:r=>fmt(r.n),csv:r=>r.n},
   {k:'nw',t:'New pos.',w:'.85fr',num:1,get:r=>fmt(r.nw),csv:r=>r.nw},
   {k:'p25',t:'25th pct',w:'.85fr',num:1,sortv:r=>D.socbench.p25[r.k],
    csv:r=>D.socbench.p25[r.k]*500||'',get:r=>money(D.socbench.p25[r.k]*500)},
@@ -714,7 +743,7 @@ const COLS={
   {k:'name',t:'Location',w:'2.2fr',sortv:r=>D.city[r.k],csv:r=>D.city[r.k],
    get:r=>`<div class="nm">${esc(D.city[r.k])}</div>`},
   {k:'emps',t:'Employers',w:'1fr',num:1,get:r=>fmt(r.emps),csv:r=>r.emps},
-  {k:'n',t:'Petitions',w:'1fr',num:1,get:r=>fmt(r.n),csv:r=>r.n},
+  {k:'n',t:'LCAs',w:'1fr',num:1,get:r=>fmt(r.n),csv:r=>r.n},
   {k:'nw',t:'New pos.',w:'1fr',num:1,get:r=>fmt(r.nw),csv:r=>r.nw},
   {k:'med',t:'Median wage',w:'1.1fr',num:1,get:r=>money(r.med),csv:r=>Math.round(r.med)||''},
   {k:'lvl',t:'Avg level',w:'.9fr',num:1,get:r=>r.lvl?r.lvl.toFixed(1):'—',csv:r=>r.lvl?r.lvl.toFixed(2):''},
@@ -734,7 +763,7 @@ const COLS={
    get:r=>esc(D.jt[K.j[P.k[r.i]]])},
   {k:'city',t:'Location',w:'1.2fr',sortv:r=>D.city[K.c[P.k[r.i]]],csv:r=>D.city[K.c[P.k[r.i]]],
    get:r=>esc(D.city[K.c[P.k[r.i]]])},
-  {k:'n',t:'Petitions',w:'.8fr',num:1,sortv:r=>P.n[r.i],csv:r=>P.n[r.i],get:r=>fmt(P.n[r.i])},
+  {k:'n',t:'LCAs',w:'.8fr',num:1,sortv:r=>P.n[r.i],csv:r=>P.n[r.i],get:r=>fmt(P.n[r.i])},
   {k:'nw',t:'New',w:'.6fr',num:1,sortv:r=>P.nw[r.i],csv:r=>P.nw[r.i],get:r=>fmt(P.nw[r.i])},
   {k:'p50',t:'Median',w:'.9fr',num:1,sortv:r=>P.p50[r.i],csv:r=>P.p50[r.i]||'',get:r=>money(P.p50[r.i])},
   {k:'lvl',t:'Lvl',w:'.5fr',num:1,sortv:r=>P.lvl[r.i],csv:r=>P.lvl[r.i]?(P.lvl[r.i]/10).toFixed(1):'',
@@ -801,12 +830,12 @@ function kpis(){
   let med=weightedMedian(vals,wts), exact=false;
   if(!narrowed()){med=D.meta.medwage;exact=true;}
   const cards=[
-    ['Petitions',fmt(n),`${pct(n/D.meta.rows)} of full dataset`],
+    ['LCAs',fmt(n),`${pct(n/D.meta.rows)} of full dataset`],
     ['Employers',fmt(emps.size),'distinct sponsors'],
     ['Worker positions',fmt(w),'total requested'],
     ['Net-new positions',fmt(nw),`${pct(nw/(w||1))} of all positions`],
     ['Median wage',money(med),exact?'annualized, exact':'annualized, estimated'],
-    ['Denial rate',pct(den/((den+cert)||1)),`${fmt(den)} denied`],
+    ['DOL LCA denial rate',pct(den/((den+cert)||1)),`${fmt(den)} denied`],
   ];
   $('#kpis').innerHTML=cards.map(([k,v,s])=>
     `<div class="kpi"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join('');
@@ -815,7 +844,7 @@ function kpis(){
 /* ---------------- views ---------------- */
 function periodPanel(){
   const ser=periodSeries();
-  return {ser, html:`<div class="panel"><h3>Petitions by fiscal quarter
+  return {ser, html:`<div class="panel"><h3>LCAs by fiscal quarter
       <em>click a bar to select that period</em></h3>
       <div class="body"><canvas id="cper"></canvas></div></div>`};
 }
@@ -837,13 +866,13 @@ function viewEmp(){
   const pp=periodPanel();
   $('#views').innerHTML=`
     <div class="grid g3">
-      <div class="panel"><h3>Top sponsors <em>by petitions, current filter</em></h3>
+      <div class="panel"><h3>Top sponsors <em>by LCAs, current filter</em></h3>
         <div class="body"><canvas id="c1"></canvas></div></div>
       <div class="panel"><h3>Where the jobs are <em>click a state to filter</em></h3>
         <div class="body"><div id="tiles"></div></div></div>
     </div>
     <div class="grid g2">
-      <div class="panel"><h3>Wage distribution <em>annualized, weighted by petitions</em></h3>
+      <div class="panel"><h3>Wage distribution <em>annualized, weighted by LCAs</em></h3>
         <div class="body"><canvas id="c2"></canvas></div></div>
       ${pp.html}
     </div>
@@ -865,7 +894,7 @@ function viewRole(){
   ROWS=rows; sortRows();
   $('#views').innerHTML=`
     <div class="grid g2">
-      <div class="panel"><h3>Petitions by occupation group <em>click a bar to filter</em></h3>
+      <div class="panel"><h3>LCAs by occupation group <em>click a bar to filter</em></h3>
         <div class="body"><div id="gbars"></div></div></div>
       <div class="panel"><h3>Median wage by occupation group <em>weighted</em></h3>
         <div class="body"><canvas id="c3"></canvas></div></div>
@@ -873,7 +902,7 @@ function viewRole(){
     <div class="grid g2">
       <div class="panel"><h3>Most-sponsored occupations</h3>
         <div class="body"><canvas id="c1"></canvas></div></div>
-      <div class="panel"><h3>Best-paying occupations <em>median, min. 200 petitions</em></h3>
+      <div class="panel"><h3>Best-paying occupations <em>median, min. 200 LCAs</em></h3>
         <div class="body"><canvas id="c2"></canvas></div></div>
     </div>
     <div class="tbar"><div class="cnt"><b>${fmt(ROWS.length)}</b> occupations match</div></div>
@@ -903,11 +932,11 @@ function viewLoc(){
   const st=rollSt();
   $('#views').innerHTML=`
     <div class="grid g3">
-      <div class="panel"><h3>Petitions by state</h3><div class="body"><div id="tiles"></div></div></div>
+      <div class="panel"><h3>LCAs by state</h3><div class="body"><div id="tiles"></div></div></div>
       <div class="panel"><h3>Top metros</h3><div class="body"><canvas id="c1"></canvas></div></div>
     </div>
     <div class="grid g2">
-      <div class="panel"><h3>Highest-paying states <em>median, min. 500 petitions</em></h3>
+      <div class="panel"><h3>Highest-paying states <em>median, min. 500 LCAs</em></h3>
         <div class="body"><canvas id="c2"></canvas></div></div>
       <div class="panel"><h3>Most net-new positions by state</h3>
         <div class="body"><canvas id="c3"></canvas></div></div>
@@ -936,6 +965,8 @@ function viewRaw(){
     <div id="tblwrap"></div>`;
   renderTable();
 }
+// Generated by pipeline/fetch_lottery.py; do not edit by hand.
+const LOTTERY={"asOf":"August 20, 2026","source":"https://www.uscis.gov/working-in-the-united-states/temporary-workers/h-1b-specialty-occupations/h-1b-electronic-registration-process","rule":"https://www.federalregister.gov/documents/2025/12/29/2025-23853/weighted-selection-process-for-registrants-and-petitioners-seeking-to-file-cap-subject-h-1b","history":[{"fy":2021,"total":274237,"eligible":269424,"single":241299,"multiple":28125,"selected":124415,"system":"registration-centric"},{"fy":2022,"total":308613,"eligible":301447,"single":211304,"multiple":90143,"selected":131924,"system":"registration-centric"},{"fy":2023,"total":483927,"eligible":474421,"single":309241,"multiple":165180,"selected":127600,"system":"registration-centric"},{"fy":2024,"total":780884,"eligible":758994,"single":350103,"multiple":408891,"selected":188400,"system":"registration-centric"},{"fy":2025,"total":479953,"eligible":470342,"single":423028,"multiple":47314,"selected":135137,"system":"beneficiary-centric"},{"fy":2026,"total":358737,"eligible":343981,"single":336153,"multiple":7828,"selected":120141,"system":"beneficiary-centric"}],"weights":[{"level":"I","weight":1,"projected":15.29,"label":"entry"},{"level":"II","weight":2,"projected":30.58,"label":"qualified"},{"level":"III","weight":3,"projected":45.87,"label":"experienced"},{"level":"IV","weight":4,"projected":61.16,"label":"expert"}]};
 
 /* ---------------- trends view ---------------- */
 function comparePeriods(){
@@ -986,10 +1017,10 @@ function viewTrend(){
       These are the same fiscal quarter a year apart, which is the only like-for-like comparison this
       dataset supports — filing volume is strongly seasonal, so comparing adjacent quarters would
       mislead. Select exactly two period chips above to compare any other pair.
-      Rows below need at least ${MINV} petitions across the two periods, and sort by ${D.periods[B]} volume until you click another column.</div>
+      Rows below need at least ${MINV} LCAs across the two periods, and sort by ${D.periods[B]} volume until you click another column.</div>
     <div id="kpi2" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
       <div class="kpi"><div class="k">${D.periods[A]}</div><div class="v">${fmt(totA)}</div>
-        <div class="s">petitions</div></div>
+        <div class="s">LCAs</div></div>
       <div class="kpi"><div class="k">${D.periods[B]}</div><div class="v">${fmt(totB)}</div>
         <div class="d ${totB>=totA?'up':'dn'}">${totA?signed((totB-totA)/totA):'—'} year over year</div></div>
       <div class="kpi"><div class="k">Grew</div><div class="v">${fmt(grew)}</div>
@@ -1002,12 +1033,12 @@ function viewTrend(){
         <div class="s">filed in ${D.periods[A]}, not ${D.periods[B]}</div></div>
     </div>
     <div class="grid g2">
-      <div class="panel"><h3>Petitions by fiscal quarter <em>click a bar to select that period</em></h3>
+      <div class="panel"><h3>LCAs by fiscal quarter <em>click a bar to select that period</em></h3>
         <div class="body"><canvas id="cper"></canvas></div></div>
       <div class="panel"><h3>Biggest movers <em>absolute change, ${D.periods[A]} → ${D.periods[B]}</em></h3>
         <div class="body"><canvas id="cmov"></canvas></div></div>
     </div>
-    <div class="tbar"><div class="cnt"><b>${fmt(ROWS.length)}</b> employers with ${MINV}+ petitions across both periods</div></div>
+    <div class="tbar"><div class="cnt"><b>${fmt(ROWS.length)}</b> employers with ${MINV}+ LCAs across both periods</div></div>
     <div id="tblwrap"></div>`;
   drawPeriodPanel(ser);
   const movers=[...ROWS].sort((a,b)=>Math.abs(b.b-b.a)-Math.abs(a.b-a.a)).slice(0,14)
@@ -1054,21 +1085,21 @@ function viewIns(){
     </tbody></table></div></div>`;
   $('#views').innerHTML=`
     <div class="note">Rankings use the current filters and period selection, limited to employers with
-      enough volume to be meaningful (25+ petitions, 50+ for the pay ranking, 3+ denials for the denial
+      enough volume to be meaningful (25+ LCAs, 50+ for the pay ranking, 3+ denials for the denial
       ranking). Ties break by petition volume, so the largest employer at a given rate appears first
       rather than whoever comes first alphabetically.</div>
     <div class="grid g2">
-      ${card('Actually growing headcount','share of positions that are net-new · 25+ petitions',growth,r=>r.newr,pct)}
+      ${card('Actually growing headcount','share of positions that are net-new · 25+ LCAs',growth,r=>r.newr,pct)}
       ${card('Pays furthest above prevailing wage','offered ÷ required minimum',payers,r=>r.pwr,v=>(v*100).toFixed(0)+'%')}
     </div>
     <div class="grid g2">
       ${card('Hires the most senior roles','average prevailing-wage level (1–4)',senior,r=>r.lvl,v=>v.toFixed(2))}
-      ${card('Highest denial rate','denied ÷ decided · 3+ denials',denial,r=>r.denr,pct)}
+      ${card('Highest DOL LCA denial rate','denied ÷ decided · 3+ denials',denial,r=>r.denr,pct)}
     </div>
     <div class="grid g2">
       <div class="panel"><h3>Wage spread by occupation <em>25th–75th percentile, top 14 by volume</em></h3>
         <div class="body" id="spread"></div></div>
-      <div class="panel"><h3>Concentration <em>share of petitions held by the top N sponsors</em></h3>
+      <div class="panel"><h3>Concentration <em>share of LCAs held by the top N sponsors</em></h3>
         <div class="body"><canvas id="c9"></canvas></div></div>
     </div>`;
   const top=[...soc].sort((a,b)=>b.n-a.n).slice(0,14);
@@ -1085,6 +1116,87 @@ function viewIns(){
   for(let i=0;i<sorted.length&&ci<marks.length;i++){run+=sorted[i].n;
     if(i+1===marks[ci]){cum.push({l:'Top '+marks[ci],v:run/tot});ci++;}}
   hbar($('#c9'),cum,{f:pct,labelW:66,c1:'#8250df',c2:'#bc8cff',height:cum.length*22+8});
+}
+
+/* ---------------- lottery ---------------- */
+// National USCIS aggregates. These are deliberately kept separate from the DOL LCA payload:
+// USCIS does not publish registration-level records or a key that can join a registration to an LCA.
+function viewLottery(){
+  ROWS=[];
+  const hist=LOTTERY.history, latest=hist[hist.length-1];
+  const latestRate=latest.selected/latest.eligible*100;
+  const maxEligible=Math.max(...hist.map(r=>r.eligible));
+  $('#views').innerHTML=`
+    <div class="note warn"><b>National USCIS statistics — not employer estimates.</b>
+      The controls, periods, employers, occupations, locations, wages and LCA denial data elsewhere in
+      this app do not filter this view. USCIS publishes only national registration aggregates, not
+      registration-level outcomes or a registration-to-LCA join key.</div>
+    <div class="lottery-hero">
+      <div class="panel"><h3>What the published rate actually measures</h3><div class="body">
+        <div class="lottery-rate"><strong>${latestRate.toFixed(2)}%</strong><span>FY2026 selected registrations ÷ eligible registrations</span></div>
+        <p class="source-list">${fmt(latest.selected)} selected registrations out of
+          ${fmt(latest.eligible)} eligible registrations. This is <b>not</b> a visa approval rate,
+          petition approval rate, or exact person-level probability.</p>
+        <div class="lottery-flow">
+          <div class="lottery-step"><b>1 · DOL LCA</b><span>Wage and worksite filing; the main dashboard's data.</span></div>
+          <div class="lottery-step"><b>2 · Registration</b><span>Cap-subject beneficiary enters USCIS selection.</span></div>
+          <div class="lottery-step"><b>3 · I-129 petition</b><span>Only a selected registration permits cap filing.</span></div>
+          <div class="lottery-step"><b>4 · Adjudication</b><span>USCIS may approve or deny the filed petition.</span></div>
+        </div>
+      </div></div>
+      <div class="panel"><h3>Eligible registration volume <em>USCIS fiscal years</em></h3><div class="body lottery-bars">
+        ${hist.map(r=>`<div class="lottery-bar"><span>FY${r.fy}</span>
+          <div class="lottery-track" data-tip="FY${r.fy}: ${fmt(r.eligible)} eligible · ${fmt(r.selected)} selected"><i style="width:${r.eligible/maxEligible*100}%"></i></div>
+          <span>${(r.eligible/1000).toFixed(0)}k</span></div>`).join('')}
+      </div></div>
+    </div>
+    <div class="panel" style="margin-bottom:16px"><h3>Historical registration outcomes
+      <em>selected registration count, not people approved</em></h3><div class="body" style="overflow-x:auto">
+      <table class="dt"><thead><tr><th>Cap FY</th><th class="num">Total</th>
+        <th class="num">Eligible</th><th class="num">No other eligible registration</th>
+        <th class="num">Multiple eligible registrations</th><th class="num">Selected</th>
+        <th class="num">Selected ÷ eligible</th><th>Selection unit</th></tr></thead><tbody>
+        ${hist.map(r=>`<tr><td><b>FY${r.fy}</b></td><td class="num sub">${fmt(r.total)}</td>
+          <td class="num">${fmt(r.eligible)}</td><td class="num sub">${fmt(r.single)}</td>
+          <td class="num sub">${fmt(r.multiple)}</td><td class="num">${fmt(r.selected)}</td>
+          <td class="num"><b>${(r.selected/r.eligible*100).toFixed(2)}%</b></td>
+          <td><span class="tag ${r.system==='beneficiary-centric'?'t-g':'t-n'}">${r.system}</span></td></tr>`).join('')}
+      </tbody></table></div></div>
+    <div class="note"><b>Why FY2025 changes the comparison.</b> USCIS moved to beneficiary-centric
+      selection for FY2025: selection is run on each unique beneficiary, and every registrant with a
+      valid registration for a selected beneficiary may be notified. The published table still reports
+      <em>selected registrations</em>, so its ratio is not an exact unique-person selection probability.
+      Eligible excludes duplicates, employer-deleted registrations, invalid travel documents and failed payments.</div>
+    <div class="panel" style="margin-bottom:16px"><h3>FY2027 wage-weighted selection
+      <em>DHS projections from the final rule, not observed outcomes</em></h3><div class="body">
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:11px">
+        ${LOTTERY.weights.map((r,i)=>`<div class="kpi weight-card level${i+1}">
+          <div class="k">Wage Level ${r.level} · ${r.label}</div><div class="v">${r.projected.toFixed(2)}%</div>
+          <div class="s">projected probability · ${r.weight}× pool weight</div></div>`).join('')}
+      </div>
+      <p class="source-list">For FY2027, USCIS generally enters a unique beneficiary in the pool one,
+        two, three or four times based on the highest OEWS wage level the offered wage equals or exceeds.
+        A selected beneficiary still counts once toward the cap. Actual odds depend on the final pool;
+        the percentages above are DHS modeling in the rule, not guarantees and not derived from this app's LCAs.</p>
+    </div></div>
+    <div class="grid g2">
+      <div class="panel"><h3>What this view can answer</h3><div class="body source-list">
+        ✓ National eligible and selected registration counts<br>
+        ✓ How multiple-registration volume changed<br>
+        ✓ Published historical selected-registration ratios<br>
+        ✓ FY2027 selection weights and DHS projected odds
+      </div></div>
+      <div class="panel"><h3>What public data cannot answer</h3><div class="body source-list">
+        ✕ Employer-specific lottery success<br>
+        ✕ Which LCA belonged to an unselected registration<br>
+        ✕ Exact unique-person odds from selected-registration counts<br>
+        ✕ Petition or visa approval from registration selection
+      </div></div>
+    </div>
+    <div class="panel"><h3>Primary sources <em>retrieved ${LOTTERY.asOf}</em></h3><div class="body source-list">
+      <a href="${LOTTERY.source}" target="_blank" rel="noopener">USCIS — H-1B Electronic Registration Process and historical data</a><br>
+      <a href="${LOTTERY.rule}" target="_blank" rel="noopener">DHS — FY2027 Weighted Selection Process final rule</a>
+    </div></div>`;
 }
 
 /* ---------------- drawer ---------------- */
@@ -1119,7 +1231,7 @@ function openDrawer(e){
   const tbl=(m,label,extra)=>{
     const arr=[...m.entries()].sort((a,b)=>b[1].n-a[1].n).slice(0,14);
     const mx=Math.max(...arr.map(x=>x[1].n),1);
-    return `<table class="dt"><thead><tr><th>${label}</th><th class="num">Petitions</th>
+    return `<table class="dt"><thead><tr><th>${label}</th><th class="num">LCAs</th>
       <th class="num">New</th><th class="num">Median</th>${extra?'<th class="num">Lvl</th>':''}</tr></thead>
       <tbody>${arr.map(([k,o])=>`<tr><td title="${esc(k)}"
         style="width:100%;max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(k)}</td>
@@ -1141,18 +1253,18 @@ function openDrawer(e){
     ${esc(D.soc[best])} — <b class="${med>=natMed?'up':'dn'}">${signed(med/natMed-1)}</b>.</div>`:'';
   $('#dbody').innerHTML=`${nat}
     <div class="dsec"><div class="dstat">
-      <div><div class="k">Petitions</div><div class="v">${fmt(n)}</div></div>
+      <div><div class="k">LCAs</div><div class="v">${fmt(n)}</div></div>
       <div><div class="k">Worker positions</div><div class="v">${fmt(w)}</div></div>
       <div><div class="k">Net-new</div><div class="v">${fmt(nw)}</div></div>
       <div><div class="k">Continuing</div><div class="v">${fmt(ct)}</div></div>
       <div><div class="k">Median wage</div><div class="v">${money(med)}</div></div>
-      <div><div class="k">Denial rate</div><div class="v">${pct(den/((den+cert)||1))}</div></div>
+      <div><div class="k">DOL LCA denial rate</div><div class="v">${pct(den/((den+cert)||1))}</div></div>
     </div>
     ${wp25&&wp75?`<div style="margin-top:9px;font-size:11.5px;color:var(--mu)">
       Pay range across all periods: <b style="color:var(--tx)">${money(wp25)}</b> (25th pct)
       &nbsp;—&nbsp; <b style="color:var(--tx)">${money(wp75)}</b> (75th pct)</div>`:''}</div>
     <div class="dsec"><h4>Filing history by fiscal quarter</h4>
-      <table class="dt"><thead><tr><th>Period</th><th class="num">Petitions</th>
+      <table class="dt"><thead><tr><th>Period</th><th class="num">LCAs</th>
         <th class="num">Net-new</th><th class="num">Median wage</th></tr></thead><tbody>
         ${D.periods.map((p,i)=>hist[i]?`<tr><td>${p}</td><td class="num">${fmt(hist[i])}</td>
           <td class="num sub">${fmt(histNew[i])}</td>
@@ -1169,6 +1281,21 @@ const closeDrawer=()=>{$('#drawer').classList.remove('open');$('#scrim').classLi
 
 /* ---------------- csv ---------------- */
 function exportCSV(){
+  if(VIEW==='lottery'){
+    const fields=['cap_fiscal_year','total_registrations','eligible_registrations',
+      'eligible_no_other_registration','eligible_multiple_registrations','selected_registrations',
+      'selected_divided_by_eligible_percent','selection_unit'];
+    const lines=[`# USCIS H-1B registration history — retrieved ${LOTTERY.asOf} — ${LOTTERY.source}`,
+      fields.join(',')];
+    LOTTERY.history.forEach(r=>lines.push([r.fy,r.total,r.eligible,r.single,r.multiple,r.selected,
+      (r.selected/r.eligible*100).toFixed(2),r.system].join(',')));
+    lines.push('',`# FY2027 DHS projected wage-level probabilities — ${LOTTERY.rule}`,
+      'wage_level,pool_weight,projected_probability_percent');
+    LOTTERY.weights.forEach(r=>lines.push([r.level,r.weight,r.projected.toFixed(2)].join(',')));
+    const blob=new Blob([lines.join('\n')],{type:'text/csv'}),a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);a.download='h1b_lottery_national_uscis.csv';a.click();
+    URL.revokeObjectURL(a.href);return;
+  }
   const cols=COLS[VIEW];
   const strip=h=>String(h).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').replace(/[—≈]/g,'').trim();
   const fields=[];
@@ -1196,7 +1323,7 @@ function renderPeriods(){
   const max=Math.max(...ser,1);
   $('#pers').innerHTML=D.periods.map((p,i)=>
     `<div class="per${allPeriods()||F.pers.has(i)?' on':''}${PNOTE[p]?' warn':''}" data-p="${i}"
-       data-tip="${p} · ${fmt(ser[i])} petitions under the current filters${PNOTE[p]?' — ⚠ '+PNOTE[p]:''}">
+       data-tip="${p} · ${fmt(ser[i])} LCAs under the current filters${PNOTE[p]?' — ⚠ '+PNOTE[p]:''}">
       <b>${p.replace('FY','')}${PNOTE[p]?' <em>⚠</em>':''}</b>
       <u>${ser[i]>=1000?(ser[i]/1000).toFixed(0)+'k':fmt(ser[i])}</u>
       <div class="pb"><i style="width:${(ser[i]/max*100).toFixed(1)}%"></i></div></div>`).join('');
@@ -1225,7 +1352,7 @@ function renderPeriods(){
   const totalSel=allPeriods()?ser.reduce((a,b)=>a+b,0)
     :[...F.pers].reduce((a,i)=>a+ser[i],0);
   $('#phint').textContent=(allPeriods()?`All ${D.periods.length} quarters`
-    :`${F.pers.size} of ${D.periods.length} quarters`)+` · ${fmt(totalSel)} petitions`;
+    :`${F.pers.size} of ${D.periods.length} quarters`)+` · ${fmt(totalSel)} LCAs`;
   const hit=[...F.pers].map(i=>D.periods[i]).filter(p=>PNOTE[p]);
   const box=$('#pwarn');
   if(hit.length&&!allPeriods()){ box.style.display='block';
@@ -1257,10 +1384,16 @@ function renderPills(){
   $('#whint').textContent=F.wage?`Showing groups with median ≥ ${money(F.wage)}`:'No wage floor applied';
 }
 function refresh(){
-  clearMaskCache(); buildMask(); renderPeriods(); renderChips(); kpis();
+  const standalone=VIEW==='lottery';
+  $('#pstrip').style.display=standalone?'none':'';
+  $('#side').style.display=standalone?'none':'';
+  $('#kpis').style.display=standalone?'none':'';
+  $('#csv').textContent=standalone?'Export lottery CSV':'Export CSV';
+  clearMaskCache(); buildMask();
+  if(!standalone){renderPeriods();renderChips();kpis();}
   $('#content').classList.toggle('raw',VIEW==='raw');
-  ({emp:viewEmp,role:viewRole,loc:viewLoc,raw:viewRaw,trend:viewTrend,ins:viewIns})[VIEW]();
-  renderPills();
+  ({emp:viewEmp,role:viewRole,loc:viewLoc,raw:viewRaw,trend:viewTrend,ins:viewIns,lottery:viewLottery})[VIEW]();
+  if(!standalone)renderPills();
   const p=new URLSearchParams();
   if(F.q)p.set('q',F.q); if(F.st)p.set('st',F.st); if(F.city)p.set('city',F.city);
   if(F.socs.size)p.set('soc',[...F.socs].join('|'));
@@ -1273,7 +1406,7 @@ function refresh(){
 let deb; const debounce=fn=>(...a)=>{clearTimeout(deb);deb=setTimeout(()=>fn(...a),190);};
 function init(){
   $('#srcline').innerHTML=`${D.meta.source} · ${D.periods.length} fiscal quarters<br>
-    ${D.periods[0]} – ${D.periods[D.periods.length-1]} · ${fmt(D.meta.rows)} petitions
+    ${D.periods[0]} – ${D.periods[D.periods.length-1]} · ${fmt(D.meta.rows)} LCAs
     · ${fmt(D.meta.employers)} employers`;
   $('#cityl').innerHTML=D.city.map(s=>`<option value="${esc(s)}">`).join('');
   $('#fst').innerHTML='<option value="">All states</option>'+
@@ -1328,7 +1461,8 @@ function init(){
   if(h.get('p'))h.get('p').split(',').forEach(s=>F.pers.add(+s));
   if(h.get('w')){F.wage=+h.get('w');$('#fwage').value=F.wage;}
   if(h.get('lvl')){F.lvl=+h.get('lvl');$('#flvl').value=F.lvl;}
-  if(h.get('v')){VIEW=h.get('v');$$('nav button[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===VIEW));}
+  const validViews=new Set(['emp','role','loc','raw','trend','ins','lottery']);
+  if(validViews.has(h.get('v'))){VIEW=h.get('v');$$('nav button[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===VIEW));}
   let rt; addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(refresh,220);});
   refresh();
 }

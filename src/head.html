@@ -172,6 +172,27 @@ table.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
 .note{background:rgba(88,166,255,.07);border:1px solid rgba(88,166,255,.22);border-radius:var(--r);padding:10px 13px;font-size:12px;color:var(--mu);margin-bottom:14px;line-height:1.55}
 .note b{color:var(--tx);font-weight:600}
 .warn{background:rgba(227,179,65,.07);border-color:rgba(227,179,65,.25)}
+.lottery-hero{display:grid;grid-template-columns:minmax(260px,1.15fr) minmax(260px,.85fr);gap:12px;margin-bottom:16px}
+.lottery-hero .panel .body{height:100%}
+.lottery-rate{display:flex;align-items:baseline;gap:9px;margin:5px 0 2px}
+.lottery-rate strong{font-size:34px;letter-spacing:-1.2px;color:var(--acc);font-variant-numeric:tabular-nums}
+.lottery-rate span{font-size:12px;color:var(--mu)}
+.lottery-flow{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px}
+.lottery-step{background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:9px}
+.lottery-step b{display:block;font-size:11px;color:var(--tx);margin-bottom:3px}
+.lottery-step span{font-size:10.5px;color:var(--mu);line-height:1.4}
+.lottery-bars{display:flex;flex-direction:column;gap:8px}
+.lottery-bar{display:grid;grid-template-columns:48px 1fr 62px;gap:9px;align-items:center}
+.lottery-bar>span{font-size:11px;color:var(--mu);font-variant-numeric:tabular-nums}
+.lottery-bar>span:last-child{text-align:right;color:var(--tx);font-weight:600}
+.lottery-track{height:10px;border-radius:5px;background:var(--bd);overflow:hidden}
+.lottery-track i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#1f6feb,var(--cy))}
+.weight-card{border-top:3px solid var(--acc)}
+.weight-card.level1{border-top-color:var(--mu2)}.weight-card.level2{border-top-color:var(--acc)}
+.weight-card.level3{border-top-color:var(--cy)}.weight-card.level4{border-top-color:var(--grn)}
+.weight-card .v{font-size:25px}.weight-card .s{line-height:1.45}
+.source-list{font-size:11.5px;color:var(--mu);line-height:1.65}
+.source-list a{color:var(--acc);text-decoration:none}.source-list a:hover{text-decoration:underline}
 #modal{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;align-items:center;justify-content:center;z-index:300;padding:24px}
 #modal.on{display:flex}
 .mbox{background:var(--panel);border:1px solid var(--bd2);border-radius:12px;max-width:780px;width:100%;max-height:86vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.6)}
@@ -222,6 +243,8 @@ table.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
   .dstat{grid-template-columns:repeat(2,1fr)}
   .mbox{max-height:92vh}
   .tbar .cnt:nth-child(2){display:none}
+  .lottery-hero{grid-template-columns:1fr}
+  .lottery-flow{grid-template-columns:1fr 1fr}
 }
 @media(max-width:560px){
   #kpis{grid-template-columns:1fr 1fr}
@@ -269,6 +292,7 @@ table.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
   <button data-v="raw">Explorer</button>
   <button data-v="trend">Trends</button>
   <button data-v="ins">Insights</button>
+  <button data-v="lottery">Lottery</button>
 </nav>
 
 <main>
@@ -313,7 +337,7 @@ table.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
       <label class="chk"><input type="checkbox" id="fnew"> Only net-new positions</label>
       <label class="chk"><input type="checkbox" id="fdep"> Exclude H-1B dependent</label>
       <label class="chk"><input type="checkbox" id="fabove"> Pays above prevailing wage</label>
-      <label class="chk"><input type="checkbox" id="fmin3"> 3+ petitions only</label>
+      <label class="chk"><input type="checkbox" id="fmin3"> 3+ LCAs only</label>
       <div class="hint"><b>Net-new</b> = positions flagged NEW_EMPLOYMENT, i.e. genuinely new hires
         rather than renewals of people already on staff.</div>
     </div>
@@ -363,16 +387,21 @@ table.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
       <em>before</em> petitioning USCIS. It proves intent to sponsor, not an approved visa or a filled
       job. Employers routinely file more LCAs than they use, so treat counts as sponsorship appetite
       rather than headcount.</p>
+    <p><b>Three different decisions.</b> A DOL LCA denial, a USCIS cap-registration non-selection,
+      and a USCIS Form I-129 petition denial are separate outcomes at separate stages. Every denial
+      rate elsewhere in this dashboard is the <em>DOL LCA denial rate</em>. The Lottery view uses only
+      USCIS's national aggregate registration table; it is not joined to these LCA records and cannot
+      produce an employer-specific or person-specific lottery rate.</p>
     <p><b>No petition is counted twice.</b> The cumulative Q3 file overlaps the Q4 files: 5,896 cases
       appear in two source files, in every instance because the LCA was certified once and then
       withdrawn later (a median of 409 days later). Each case is kept exactly once, at its
       <em>earliest</em> decision, so a petition certified in July 2023 and withdrawn in May 2026 counts
       in FY2023 Q4 where the sponsorship actually happened, rather than being carried forward into
       FY2026. Selecting several quarters therefore adds them cleanly — FY2026 Q1 + Q2 + Q3 sums to the
-      FY2026 total with nothing repeated, and the six quarters partition all 799,016 petitions.</p>
-    <p><b>Petitions vs. worker positions.</b> One LCA can cover many positions. Across the file the
+      FY2026 total with nothing repeated, and the six quarters partition all 799,016 LCAs.</p>
+    <p><b>LCAs vs. worker positions.</b> One LCA can cover many positions. Across the file the
       median is 1 position per filing, but a few employers file blanket LCAs covering dozens at once.
-      Rankings sort by petitions by default, and any employer averaging 10+ positions per filing is
+      Rankings sort by LCAs by default, and any employer averaging 10+ positions per filing is
       marked with a ×N badge in the Workers column. Read those as sponsorship capacity, not hires.</p>
     <p><b>Wages</b> are annualized (hourly × 2080, monthly × 12, weekly × 52, bi-weekly × 26). Where a
       pay range is filed the midpoint is used. Values below $15k or above $2M are dropped as data-entry
@@ -385,12 +414,12 @@ table.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
       distinct subsidiaries stay separate.</p>
     <p><b>Net-new</b> counts positions flagged NEW_EMPLOYMENT rather than CONTINUED_EMPLOYMENT
       (renewing someone already on staff). This is the most useful column for a job search: a firm
-      filing thousands of petitions that are almost all renewals isn't hiring, it's maintaining.</p>
+      filing thousands of LCAs that are almost all renewals isn't hiring, it's maintaining.</p>
     <p><b>vs prevailing</b> is offered wage ÷ the DOL-determined prevailing wage for that role and area.
       100% means paying exactly the legal floor. Very high values usually mean the occupation's
       prevailing wage comes from a low survey baseline — common in medicine and academia — not that the
       job pays several times market. <b>Level</b> is the DOL prevailing-wage skill level, I (entry)
-      through IV (expert), averaged and weighted by petitions.</p>
+      through IV (expert), averaged and weighted by LCAs.</p>
     <p><b>Occupation groups</b> roll the SOC occupations into 11 categories using the official SOC major
       group (first two digits of the code). Technology &amp; Software is major group 15, Healthcare &amp;
       Medicine is 29 and 31, Education &amp; Academia is 25, and so on; low-volume groups collect into

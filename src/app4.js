@@ -9,7 +9,7 @@ function renderPeriods(){
   const max=Math.max(...ser,1);
   $('#pers').innerHTML=D.periods.map((p,i)=>
     `<div class="per${allPeriods()||F.pers.has(i)?' on':''}${PNOTE[p]?' warn':''}" data-p="${i}"
-       data-tip="${p} · ${fmt(ser[i])} petitions under the current filters${PNOTE[p]?' — ⚠ '+PNOTE[p]:''}">
+       data-tip="${p} · ${fmt(ser[i])} LCAs under the current filters${PNOTE[p]?' — ⚠ '+PNOTE[p]:''}">
       <b>${p.replace('FY','')}${PNOTE[p]?' <em>⚠</em>':''}</b>
       <u>${ser[i]>=1000?(ser[i]/1000).toFixed(0)+'k':fmt(ser[i])}</u>
       <div class="pb"><i style="width:${(ser[i]/max*100).toFixed(1)}%"></i></div></div>`).join('');
@@ -38,7 +38,7 @@ function renderPeriods(){
   const totalSel=allPeriods()?ser.reduce((a,b)=>a+b,0)
     :[...F.pers].reduce((a,i)=>a+ser[i],0);
   $('#phint').textContent=(allPeriods()?`All ${D.periods.length} quarters`
-    :`${F.pers.size} of ${D.periods.length} quarters`)+` · ${fmt(totalSel)} petitions`;
+    :`${F.pers.size} of ${D.periods.length} quarters`)+` · ${fmt(totalSel)} LCAs`;
   const hit=[...F.pers].map(i=>D.periods[i]).filter(p=>PNOTE[p]);
   const box=$('#pwarn');
   if(hit.length&&!allPeriods()){ box.style.display='block';
@@ -70,10 +70,16 @@ function renderPills(){
   $('#whint').textContent=F.wage?`Showing groups with median ≥ ${money(F.wage)}`:'No wage floor applied';
 }
 function refresh(){
-  clearMaskCache(); buildMask(); renderPeriods(); renderChips(); kpis();
+  const standalone=VIEW==='lottery';
+  $('#pstrip').style.display=standalone?'none':'';
+  $('#side').style.display=standalone?'none':'';
+  $('#kpis').style.display=standalone?'none':'';
+  $('#csv').textContent=standalone?'Export lottery CSV':'Export CSV';
+  clearMaskCache(); buildMask();
+  if(!standalone){renderPeriods();renderChips();kpis();}
   $('#content').classList.toggle('raw',VIEW==='raw');
-  ({emp:viewEmp,role:viewRole,loc:viewLoc,raw:viewRaw,trend:viewTrend,ins:viewIns})[VIEW]();
-  renderPills();
+  ({emp:viewEmp,role:viewRole,loc:viewLoc,raw:viewRaw,trend:viewTrend,ins:viewIns,lottery:viewLottery})[VIEW]();
+  if(!standalone)renderPills();
   const p=new URLSearchParams();
   if(F.q)p.set('q',F.q); if(F.st)p.set('st',F.st); if(F.city)p.set('city',F.city);
   if(F.socs.size)p.set('soc',[...F.socs].join('|'));
@@ -86,7 +92,7 @@ function refresh(){
 let deb; const debounce=fn=>(...a)=>{clearTimeout(deb);deb=setTimeout(()=>fn(...a),190);};
 function init(){
   $('#srcline').innerHTML=`${D.meta.source} · ${D.periods.length} fiscal quarters<br>
-    ${D.periods[0]} – ${D.periods[D.periods.length-1]} · ${fmt(D.meta.rows)} petitions
+    ${D.periods[0]} – ${D.periods[D.periods.length-1]} · ${fmt(D.meta.rows)} LCAs
     · ${fmt(D.meta.employers)} employers`;
   $('#cityl').innerHTML=D.city.map(s=>`<option value="${esc(s)}">`).join('');
   $('#fst').innerHTML='<option value="">All states</option>'+
@@ -141,7 +147,8 @@ function init(){
   if(h.get('p'))h.get('p').split(',').forEach(s=>F.pers.add(+s));
   if(h.get('w')){F.wage=+h.get('w');$('#fwage').value=F.wage;}
   if(h.get('lvl')){F.lvl=+h.get('lvl');$('#flvl').value=F.lvl;}
-  if(h.get('v')){VIEW=h.get('v');$$('nav button[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===VIEW));}
+  const validViews=new Set(['emp','role','loc','raw','trend','ins','lottery']);
+  if(validViews.has(h.get('v'))){VIEW=h.get('v');$$('nav button[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===VIEW));}
   let rt; addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(refresh,220);});
   refresh();
 }

@@ -11,7 +11,7 @@ const COLS={
   {k:'name',t:'Employer',w:'2.5fr',sortv:r=>D.emp[r.k],csv:r=>D.emp[r.k],
    csv2:['Headquarters',r=>D.empmeta.hq[r.k]||''],
    get:r=>`<div class="nm">${esc(D.emp[r.k])}</div><div class="sub">${esc(D.empmeta.hq[r.k]||'')}</div>`},
-  {k:'n',t:'Petitions',w:'.85fr',num:1,get:r=>fmt(r.n),csv:r=>r.n},
+  {k:'n',t:'LCAs',w:'.85fr',num:1,get:r=>fmt(r.n),csv:r=>r.n},
   {k:'nw',t:'New pos.',w:'.85fr',num:1,csv:r=>r.nw,csv2:['New pos. %',r=>(r.newr*100).toFixed(1)],
    get:r=>`${fmt(r.nw)} <span class="sub">${pct(r.newr)}</span>`},
   {k:'w',t:'Workers',w:'.9fr',num:1,csv:r=>r.w,csv2:['Positions per LCA',r=>r.n?(r.w/r.n).toFixed(1):''],
@@ -32,7 +32,7 @@ const COLS={
   {k:'grp',t:'Group',w:'1.3fr',sortv:r=>D.grp[D.socgrp[r.k]],csv:r=>D.grp[D.socgrp[r.k]],
    get:r=>`<span class="tag ${GTAG[D.socgrp[r.k]]}">${esc(D.grp[D.socgrp[r.k]])}</span>`},
   {k:'emps',t:'Employers',w:'.9fr',num:1,get:r=>fmt(r.emps),csv:r=>r.emps},
-  {k:'n',t:'Petitions',w:'.9fr',num:1,get:r=>fmt(r.n),csv:r=>r.n},
+  {k:'n',t:'LCAs',w:'.9fr',num:1,get:r=>fmt(r.n),csv:r=>r.n},
   {k:'nw',t:'New pos.',w:'.85fr',num:1,get:r=>fmt(r.nw),csv:r=>r.nw},
   {k:'p25',t:'25th pct',w:'.85fr',num:1,sortv:r=>D.socbench.p25[r.k],
    csv:r=>D.socbench.p25[r.k]*500||'',get:r=>money(D.socbench.p25[r.k]*500)},
@@ -47,7 +47,7 @@ const COLS={
   {k:'name',t:'Location',w:'2.2fr',sortv:r=>D.city[r.k],csv:r=>D.city[r.k],
    get:r=>`<div class="nm">${esc(D.city[r.k])}</div>`},
   {k:'emps',t:'Employers',w:'1fr',num:1,get:r=>fmt(r.emps),csv:r=>r.emps},
-  {k:'n',t:'Petitions',w:'1fr',num:1,get:r=>fmt(r.n),csv:r=>r.n},
+  {k:'n',t:'LCAs',w:'1fr',num:1,get:r=>fmt(r.n),csv:r=>r.n},
   {k:'nw',t:'New pos.',w:'1fr',num:1,get:r=>fmt(r.nw),csv:r=>r.nw},
   {k:'med',t:'Median wage',w:'1.1fr',num:1,get:r=>money(r.med),csv:r=>Math.round(r.med)||''},
   {k:'lvl',t:'Avg level',w:'.9fr',num:1,get:r=>r.lvl?r.lvl.toFixed(1):'—',csv:r=>r.lvl?r.lvl.toFixed(2):''},
@@ -67,7 +67,7 @@ const COLS={
    get:r=>esc(D.jt[K.j[P.k[r.i]]])},
   {k:'city',t:'Location',w:'1.2fr',sortv:r=>D.city[K.c[P.k[r.i]]],csv:r=>D.city[K.c[P.k[r.i]]],
    get:r=>esc(D.city[K.c[P.k[r.i]]])},
-  {k:'n',t:'Petitions',w:'.8fr',num:1,sortv:r=>P.n[r.i],csv:r=>P.n[r.i],get:r=>fmt(P.n[r.i])},
+  {k:'n',t:'LCAs',w:'.8fr',num:1,sortv:r=>P.n[r.i],csv:r=>P.n[r.i],get:r=>fmt(P.n[r.i])},
   {k:'nw',t:'New',w:'.6fr',num:1,sortv:r=>P.nw[r.i],csv:r=>P.nw[r.i],get:r=>fmt(P.nw[r.i])},
   {k:'p50',t:'Median',w:'.9fr',num:1,sortv:r=>P.p50[r.i],csv:r=>P.p50[r.i]||'',get:r=>money(P.p50[r.i])},
   {k:'lvl',t:'Lvl',w:'.5fr',num:1,sortv:r=>P.lvl[r.i],csv:r=>P.lvl[r.i]?(P.lvl[r.i]/10).toFixed(1):'',
@@ -134,12 +134,12 @@ function kpis(){
   let med=weightedMedian(vals,wts), exact=false;
   if(!narrowed()){med=D.meta.medwage;exact=true;}
   const cards=[
-    ['Petitions',fmt(n),`${pct(n/D.meta.rows)} of full dataset`],
+    ['LCAs',fmt(n),`${pct(n/D.meta.rows)} of full dataset`],
     ['Employers',fmt(emps.size),'distinct sponsors'],
     ['Worker positions',fmt(w),'total requested'],
     ['Net-new positions',fmt(nw),`${pct(nw/(w||1))} of all positions`],
     ['Median wage',money(med),exact?'annualized, exact':'annualized, estimated'],
-    ['Denial rate',pct(den/((den+cert)||1)),`${fmt(den)} denied`],
+    ['DOL LCA denial rate',pct(den/((den+cert)||1)),`${fmt(den)} denied`],
   ];
   $('#kpis').innerHTML=cards.map(([k,v,s])=>
     `<div class="kpi"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join('');
@@ -148,7 +148,7 @@ function kpis(){
 /* ---------------- views ---------------- */
 function periodPanel(){
   const ser=periodSeries();
-  return {ser, html:`<div class="panel"><h3>Petitions by fiscal quarter
+  return {ser, html:`<div class="panel"><h3>LCAs by fiscal quarter
       <em>click a bar to select that period</em></h3>
       <div class="body"><canvas id="cper"></canvas></div></div>`};
 }
@@ -170,13 +170,13 @@ function viewEmp(){
   const pp=periodPanel();
   $('#views').innerHTML=`
     <div class="grid g3">
-      <div class="panel"><h3>Top sponsors <em>by petitions, current filter</em></h3>
+      <div class="panel"><h3>Top sponsors <em>by LCAs, current filter</em></h3>
         <div class="body"><canvas id="c1"></canvas></div></div>
       <div class="panel"><h3>Where the jobs are <em>click a state to filter</em></h3>
         <div class="body"><div id="tiles"></div></div></div>
     </div>
     <div class="grid g2">
-      <div class="panel"><h3>Wage distribution <em>annualized, weighted by petitions</em></h3>
+      <div class="panel"><h3>Wage distribution <em>annualized, weighted by LCAs</em></h3>
         <div class="body"><canvas id="c2"></canvas></div></div>
       ${pp.html}
     </div>
@@ -198,7 +198,7 @@ function viewRole(){
   ROWS=rows; sortRows();
   $('#views').innerHTML=`
     <div class="grid g2">
-      <div class="panel"><h3>Petitions by occupation group <em>click a bar to filter</em></h3>
+      <div class="panel"><h3>LCAs by occupation group <em>click a bar to filter</em></h3>
         <div class="body"><div id="gbars"></div></div></div>
       <div class="panel"><h3>Median wage by occupation group <em>weighted</em></h3>
         <div class="body"><canvas id="c3"></canvas></div></div>
@@ -206,7 +206,7 @@ function viewRole(){
     <div class="grid g2">
       <div class="panel"><h3>Most-sponsored occupations</h3>
         <div class="body"><canvas id="c1"></canvas></div></div>
-      <div class="panel"><h3>Best-paying occupations <em>median, min. 200 petitions</em></h3>
+      <div class="panel"><h3>Best-paying occupations <em>median, min. 200 LCAs</em></h3>
         <div class="body"><canvas id="c2"></canvas></div></div>
     </div>
     <div class="tbar"><div class="cnt"><b>${fmt(ROWS.length)}</b> occupations match</div></div>
@@ -236,11 +236,11 @@ function viewLoc(){
   const st=rollSt();
   $('#views').innerHTML=`
     <div class="grid g3">
-      <div class="panel"><h3>Petitions by state</h3><div class="body"><div id="tiles"></div></div></div>
+      <div class="panel"><h3>LCAs by state</h3><div class="body"><div id="tiles"></div></div></div>
       <div class="panel"><h3>Top metros</h3><div class="body"><canvas id="c1"></canvas></div></div>
     </div>
     <div class="grid g2">
-      <div class="panel"><h3>Highest-paying states <em>median, min. 500 petitions</em></h3>
+      <div class="panel"><h3>Highest-paying states <em>median, min. 500 LCAs</em></h3>
         <div class="body"><canvas id="c2"></canvas></div></div>
       <div class="panel"><h3>Most net-new positions by state</h3>
         <div class="body"><canvas id="c3"></canvas></div></div>
