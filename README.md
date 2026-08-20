@@ -118,8 +118,9 @@ python3 stats.py --html                           # traffic report
 before they touch disk. The log, salt and report are all refused by the server and written outside
 the served folder. See [site/README.md](site/README.md).
 
-For **GitHub Pages**, point Pages at `/site` and delete `serve.py` / `stats.py` first — on a static
-host they would just sit there as downloadable text.
+For **GitHub Pages**, this repository includes `.github/workflows/pages.yml`. In the repository's
+Settings → Pages, choose **GitHub Actions** as the source. Every push to `main` or `work` publishes
+only `site/index.html` and `site/payload.bin.gz`; the self-hosting scripts are not included.
 
 ![Mobile](docs/screenshot-mobile.png)
 
