@@ -169,7 +169,7 @@ function distinct(keyFn){
     if(!s.has(k)) s.set(k,new Set()); s.get(k).add(P.e[i]); }
   return s;
 }
-// petitions per period for the current filters (period filter itself ignored)
+// LCAs per period for the current filters (period filter itself ignored)
 function periodSeries(mask){
   const M=mask||computeMask({skipPeriods:true}), c=new Float64Array(D.periods.length);
   for(let i=0;i<P.N;i++) if(M[i]) c[P.q[i]]+=P.n[i];
@@ -254,7 +254,7 @@ function tilemap(el,rows){
     const a=v?0.16+0.84*Math.pow(v/max,.42):0.05;
     return `<div class="tile${F.st===ab?' sel':''}" data-st="${ab}"
       style="background:rgba(88,166,255,${a.toFixed(3)});grid-row:${r};grid-column:${c}"
-      data-tip="${ab} · ${fmt(v)} petitions${d?' · med '+money(d.med):''}">
+      data-tip="${ab} · ${fmt(v)} LCAs${d?' · med '+money(d.med):''}">
       ${ab}<small>${v?(v>=1000?(v/1000).toFixed(v>=10000?0:1)+'k':v):''}</small></div>`;}).join('');
   el.querySelectorAll('.tile').forEach(t=>t.onclick=()=>{
     F.st=F.st===t.dataset.st?'':t.dataset.st; $('#fst').value=F.st; refresh();});

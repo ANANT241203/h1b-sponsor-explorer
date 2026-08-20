@@ -74,7 +74,11 @@ it in JavaScript. The `_headers` file sets `Content-Encoding: identity` for that
 
 ## Data
 
-U.S. Department of Labor, OFLC LCA Disclosure Data — 799,016 petitions, FY2023 Q4 through
+U.S. Department of Labor, OFLC LCA Disclosure Data — 799,016 LCAs, FY2023 Q4 through
 FY2026 Q3. Public federal data. Contains employer and law-firm organization names only; no
 attorney names, emails, phone numbers or tax IDs. Full method notes are in the app under
 "Methodology".
+
+The Lottery view is a separate national series from USCIS's H-1B electronic-registration table
+(FY2021–FY2026), plus DHS's projected FY2027 wage-level selection probabilities. It is not joined to
+the DOL records and does not claim employer-specific or person-specific lottery odds.
